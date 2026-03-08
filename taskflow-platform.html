@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>TaskFlow — Earn Daily</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --border: #2a2a3d;
+    --accent: #00ff88;
+    --accent2: #7c3aed;
+    --accent3: #f59e0b;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --danger: #ef4444;
+    --gold: #fbbf24;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'Syne', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(124,58,237,0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,255,136,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* AUTH GATE */
+  .auth-gate { position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px; }
+  .auth-gate.hidden { display:none; }
+  .auth-box { width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;animation:fadeIn 0.4s ease; }
+  .auth-header { background:linear-gradient(135deg,#1a0a2e,#0d1f0d);padding:32px 32px 24px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden; }
+  .auth-header::before { content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(0,255,136,0.12),transparent 70%); }
+  .auth-logo { font-size:28px;font-weight:800;letter-spacing:-1px;position:relative; }
+  .auth-logo span { color:var(--accent); }
+  .auth-tagline { font-size:12px;color:var(--muted);margin-top:4px;position:relative;font-family:'DM Mono',monospace;letter-spacing:1px; }
+  .auth-tabs { display:flex;border-bottom:1px solid var(--border); }
+  .auth-tab { flex:1;padding:15px;text-align:center;font-size:14px;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;transition:all 0.2s; }
+  .auth-tab.active { color:var(--accent);border-bottom-color:var(--accent);background:rgba(0,255,136,0.03); }
+  .auth-body { padding:26px 30px; }
+  .auth-screen { display:none; }
+  .auth-screen.active { display:block; }
+  .field { margin-bottom:14px; }
+  .field label { font-size:11px;color:var(--muted);letter-spacing:1.5px;font-family:'DM Mono',monospace;display:block;margin-bottom:6px; }
+  .field input { width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:9px;font-family:'Syne',sans-serif;font-size:14px;outline:none;transition:border-color 0.2s; }
+  .field input:focus { border-color:var(--accent); }
+  .field input::placeholder { color:var(--muted); }
+  .auth-btn { width:100%;background:var(--accent);color:#000;border:none;padding:13px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:15px;cursor:pointer;transition:all 0.2s;margin-top:4px; }
+  .auth-btn:hover { box-shadow:0 4px 24px rgba(0,255,136,0.35);transform:translateY(-1px); }
+  .pay-screen { display:none; }
+  .pay-screen.active { display:block; }
+  .pay-badge { background:linear-gradient(135deg,rgba(0,255,136,0.1),rgba(124,58,237,0.1));border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:20px;text-align:center;margin-bottom:20px; }
+  .pay-amount { font-size:44px;font-weight:800;color:var(--accent);letter-spacing:-2px; }
+  .pay-label { font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:4px; }
+  .pay-perks { display:grid;gap:9px;margin-bottom:20px; }
+  .perk { display:flex;align-items:center;gap:10px;font-size:13px; }
+  .perk-icon { color:var(--accent);font-size:15px;flex-shrink:0; }
+  .pay-methods { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px; }
+  .pay-method { border:2px solid var(--border);border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:all 0.2s;font-size:13px;font-weight:600; }
+  .pay-method:hover,.pay-method.selected { border-color:var(--accent);background:rgba(0,255,136,0.08);color:var(--accent); }
+  .pay-method .pm-icon { font-size:22px;display:block;margin-bottom:4px; }
+  .back-link { text-align:center;margin-top:14px;font-size:13px;color:var(--muted);cursor:pointer; }
+  .back-link:hover { color:var(--text); }
+  .success-screen { display:none;text-align:center;padding:10px 0 20px; }
+  .success-screen.active { display:block; }
+  .success-icon { font-size:56px;margin-bottom:12px;display:block;animation:pop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes pop { from{transform:scale(0);}to{transform:scale(1);} }
+  .success-title { font-size:22px;font-weight:800;margin-bottom:8px; }
+  .success-sub { font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:24px; }
+
+  /* LAYOUT */
+  .app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    position: fixed;
+    height: 100vh;
+    z-index: 100;
+  }
+  .logo {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .logo-mark {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+  .logo-mark span { color: var(--accent); }
+  .logo-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+  .nav { flex: 1; }
+  .nav-section {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    padding: 0 24px;
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 24px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active {
+    color: var(--accent);
+    background: rgba(0,255,136,0.05);
+    border-left-color: var(--accent);
+  }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge {
+    margin-left: auto;
+    background: var(--accent2);
+    color: white;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+  }
+  .sidebar-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+  }
+  .user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: white;
+    flex-shrink: 0;
+  }
+  .user-info .name { font-size: 13px; font-weight: 600; }
+  .user-info .tier {
+    font-size: 10px;
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* MAIN */
+  .main { margin-left: 240px; flex: 1; padding: 32px; }
+
+  /* TOPBAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 32px;
+  }
+  .page-title { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+  .page-title span { color: var(--accent); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .streak-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245,158,11,0.1);
+    border: 1px solid rgba(245,158,11,0.3);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold);
+  }
+  .wallet-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .wallet-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(0,255,136,0.3); }
+
+  /* STAT CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--accent2); }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    opacity: 0.08;
+  }
+  .stat-card.green::before { background: var(--accent); right: -20px; top: -20px; }
+  .stat-card.purple::before { background: var(--accent2); right: -20px; top: -20px; }
+  .stat-card.gold::before { background: var(--gold); right: -20px; top: -20px; }
+  .stat-card.red::before { background: var(--danger); right: -20px; top: -20px; }
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 10px;
+  }
+  .stat-value { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+  .stat-value.green { color: var(--accent); }
+  .stat-value.purple { color: #a78bfa; }
+  .stat-value.gold { color: var(--gold); }
+  .stat-value.red { color: var(--danger); }
+  .stat-change {
+    font-size: 11px;
+    color: var(--accent);
+    margin-top: 6px;
+    font-family: 'DM Mono', monospace;
+  }
+  .stat-icon { position: absolute; top: 18px; right: 18px; font-size: 22px; opacity: 0.6; }
+
+  /* GRID LAYOUT */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 20px;
+  }
+  .left-col { display: flex; flex-direction: column; gap: 20px; }
+  .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+  /* PANELS */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-title { font-size: 15px; font-weight: 700; }
+  .panel-action {
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'DM Mono', monospace;
+    border: 1px solid rgba(0,255,136,0.3);
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+  .panel-action:hover { background: rgba(0,255,136,0.1); }
+
+  /* TASK LIST */
+  .task-filters {
+    display: flex;
+    gap: 8px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .filter-btn {
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .filter-btn.active {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+  .filter-btn:hover:not(.active) { border-color: var(--muted); color: var(--text); }
+
+  .task-list { padding: 8px 0; }
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .task-item:hover { background: rgba(255,255,255,0.02); }
+  .task-item:last-child { border-bottom: none; }
+  .task-cat-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .task-cat-icon.writing { background: rgba(124,58,237,0.15); }
+  .task-cat-icon.data { background: rgba(0,255,136,0.1); }
+  .task-cat-icon.social { background: rgba(245,158,11,0.1); }
+  .task-cat-icon.review { background: rgba(239,68,68,0.1); }
+  .task-cat-icon.design { background: rgba(59,130,246,0.1); }
+  .task-info { flex: 1; min-width: 0; }
+  .task-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+  .task-meta { display: flex; gap: 10px; align-items: center; }
+  .task-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+  .tag-easy { background: rgba(0,255,136,0.1); color: var(--accent); }
+  .tag-medium { background: rgba(245,158,11,0.1); color: var(--gold); }
+  .tag-hard { background: rgba(239,68,68,0.1); color: var(--danger); }
+  .task-time { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .task-pay {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+  }
+  .task-slots { font-size: 10px; color: var(--muted); text-align: right; margin-top: 2px; }
+  .start-btn {
+    background: rgba(0,255,136,0.1);
+    border: 1px solid rgba(0,255,136,0.3);
+    color: var(--accent);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .start-btn:hover { background: var(--accent); color: #000; }
+
+  /* EARNINGS CHART */
+  .chart-area { padding: 20px; }
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 100px;
+    margin-bottom: 8px;
+  }
+  .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    background: var(--surface2);
+    transition: all 0.3s;
+    position: relative;
+    min-height: 4px;
+  }
+  .bar.filled { background: linear-gradient(to top, var(--accent2), var(--accent)); }
+  .bar.today { background: var(--accent); box-shadow: 0 0 12px rgba(0,255,136,0.4); }
+  .bar-label { font-size: 9px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+  /* LEADERBOARD */
+  .leaderboard-list { padding: 8px 0; }
+  .lb-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.15s;
+  }
+  .lb-item:hover { background: rgba(255,255,255,0.02); }
+  .lb-item:last-child { border-bottom: none; }
+  .lb-rank {
+    font-size: 14px;
+    font-weight: 800;
+    font-family: 'DM Mono', monospace;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .rank-1 { color: var(--gold); }
+  .rank-2 { color: #94a3b8; }
+  .rank-3 { color: #cd7c2f; }
+  .rank-other { color: var(--muted); }
+  .lb-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .lb-info { flex: 1; }
+  .lb-name { font-size: 13px; font-weight: 600; }
+  .lb-tasks { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .lb-earn { font-size: 14px; font-weight: 800; color: var(--accent); font-family: 'DM Mono', monospace; }
+  .you-badge {
+    font-size: 9px;
+    background: rgba(0,255,136,0.15);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    margin-left: 6px;
+  }
+
+  /* WALLET PANEL */
+  .wallet-panel { padding: 20px; }
+  .wallet-balance {
+    background: linear-gradient(135deg, var(--accent2), #4c1d95);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .wallet-balance::before {
+    content: '';
+    position: absolute;
+    right: -20px; bottom: -20px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .wallet-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    font-family: 'DM Mono', monospace;
+    margin-bottom: 8px;
+  }
+  .wallet-amount { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+  .wallet-pending { font-size: 12px; opacity: 0.7; margin-top: 4px; font-family: 'DM Mono', monospace; }
+  .wallet-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .w-btn {
+    flex: 1;
+    padding: 9px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    border: none;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .w-btn-primary { background: white; color: #000; }
+  .w-btn-secondary { background: rgba(255,255,255,0.15); color: white; }
+  .w-btn:hover { transform: translateY(-1px); }
+
+  .tx-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .tx-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-left .tx-name { font-size: 13px; font-weight: 500; }
+  .tx-left .tx-date { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
+  .tx-amount { font-size: 14px; font-weight: 700; font-family: 'DM Mono', monospace; }
+  .tx-amount.plus { color: var(--accent); }
+  .tx-amount.minus { color: var(--danger); }
+
+  /* PROGRESS SECTION */
+  .progress-section { padding: 20px; }
+  .prog-item { margin-bottom: 16px; }
+  .prog-item:last-child { margin-bottom: 0; }
+  .prog-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+  .prog-name { font-size: 13px; font-weight: 600; }
+  .prog-val { font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .prog-bar { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    padding: 14px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* MODAL OVERLAY */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 460px;
+    max-width: 90vw;
+    position: relative;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal-close {
+    position: absolute;
+    top: 16px; right: 16px;
+    background: var(--surface2);
+    border: none;
+    color: var(--muted);
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .modal-pay {
+    background: rgba(0,255,136,0.08);
+    border: 1px solid rgba(0,255,136,0.2);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-pay-label { font-size: 12px; color: var(--muted); }
+  .modal-pay-amount { font-size: 28px; font-weight: 800; color: var(--accent); }
+  .modal-btn {
+    width: 100%;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 13px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    transition: all 0.2s;
+  }
+  .modal-btn:hover { box-shadow: 0 4px 24px rgba(0,255,136,0.35); }
+
+  /* NOTIFICATIONS */
+  .notif {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 300;
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .notif.show { transform: translateX(0); }
+  .notif-icon { font-size: 24px; }
+  .notif-text .notif-title { font-size: 14px; font-weight: 700; }
+  .notif-text .notif-sub { font-size: 12px; color: var(--muted); }
+
+  /* DAILY GOAL */
+  .daily-goal {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 16px;
+    margin: 16px 20px;
+  }
+  .dg-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .dg-title { font-size: 13px; font-weight: 700; }
+  .dg-amount { font-size: 13px; font-weight: 700; color: var(--accent); font-family: 'DM Mono', monospace; }
+  .dg-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .dg-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--accent2), var(--accent));
+    border-radius: 4px;
+    width: 62%;
+    position: relative;
+  }
+  .dg-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: white;
+    border-radius: 2px;
+    opacity: 0.8;
+  }
+  .dg-sub { font-size: 11px; color: var(--muted); margin-top: 8px; font-family: 'DM Mono', monospace; }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .stat-card { animation: fadeIn 0.4s ease both; }
+  .stat-card:nth-child(1) { animation-delay: 0.05s; }
+  .stat-card:nth-child(2) { animation-delay: 0.1s; }
+  .stat-card:nth-child(3) { animation-delay: 0.15s; }
+  .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+  .pulse { animation: pulse 2s infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .main { margin-left: 0; padding: 16px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+</head>
+<body>
+
+<!-- ======= AUTH GATE ======= -->
+<div class="auth-gate" id="authGate">
+  <div class="auth-box">
+    <div class="auth-header">
+      <div class="auth-logo">Task<span>Flow</span></div>
+      <div class="auth-tagline">NIGERIA'S #1 MICROJOB PLATFORM</div>
+    </div>
+
+    <!-- LOGIN / REGISTER TABS -->
+    <div class="auth-tabs" id="authTabs">
+      <div class="auth-tab active" onclick="switchAuthTab('login')">Login</div>
+      <div class="auth-tab" onclick="switchAuthTab('register')">Create Account</div>
+    </div>
+
+    <div class="auth-body" id="authBody">
+
+      <!-- LOGIN SCREEN -->
+      <div class="auth-screen active" id="loginScreen">
+        <div class="field"><label>EMAIL ADDRESS</label><input type="email" id="loginEmail" placeholder="you@email.com"/></div>
+        <div class="field"><label>PASSWORD</label><input type="password" id="loginPass" placeholder="••••••••"/></div>
+        <button class="auth-btn" onclick="doLogin()">Login to Dashboard →</button>
+        <div style="text-align:center;margin-top:14px;font-size:13px;color:var(--muted);">No account? <span style="color:var(--accent);cursor:pointer;" onclick="switchAuthTab('register')">Register here</span></div>
+      </div>
+
+      <!-- REGISTER SCREEN -->
+      <div class="auth-screen" id="registerScreen">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="field"><label>FIRST NAME</label><input type="text" id="regFirst" placeholder="Emeka"/></div>
+          <div class="field"><label>LAST NAME</label><input type="text" id="regLast" placeholder="Obi"/></div>
+        </div>
+        <div class="field"><label>EMAIL ADDRESS</label><input type="email" id="regEmail" placeholder="you@email.com"/></div>
+        <div class="field"><label>PHONE NUMBER</label><input type="tel" id="regPhone" placeholder="08012345678"/></div>
+        <div class="field"><label>PASSWORD</label><input type="password" id="regPass" placeholder="Min. 6 characters"/></div>
+        <div class="field"><label>REFERRAL CODE (OPTIONAL)</label><input type="text" id="regRef" placeholder="e.g. TF-ABCD12"/></div>
+        <button class="auth-btn" onclick="doRegister()">Continue to Payment →</button>
+        <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--muted);">Already have an account? <span style="color:var(--accent);cursor:pointer;" onclick="switchAuthTab('login')">Login</span></div>
+      </div>
+
+    </div>
+
+    <!-- PAYMENT SCREEN (shown after register) -->
+    <div class="pay-screen" id="payScreen">
+      <div class="auth-body">
+        <div class="pay-badge">
+          <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:6px;">ONE-TIME ACTIVATION FEE</div>
+          <div class="pay-amount">₦3,000</div>
+          <div class="pay-label">Unlocks your full TaskFlow account forever</div>
+        </div>
+        <div class="pay-perks">
+          <div class="perk"><span class="perk-icon">✅</span> Instant access to all earning tasks</div>
+          <div class="perk"><span class="perk-icon">✅</span> Personal wallet with bank withdrawal</div>
+          <div class="perk"><span class="perk-icon">✅</span> Referral system — earn ₦500 per friend</div>
+          <div class="perk"><span class="perk-icon">✅</span> Daily tasks that pay ₦5,000–₦50,000</div>
+          <div class="perk"><span class="perk-icon">✅</span> Leaderboard competitions & bonuses</div>
+        </div>
+        <div style="background:var(--surface2);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:16px;margin-bottom:16px;">
+          <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:2px;margin-bottom:12px;">TRANSFER ₦3,000 TO THIS ACCOUNT</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--muted);">Bank</span>
+              <span style="font-size:14px;font-weight:700;color:var(--text);">Opay</span>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.05);"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--muted);">Account Number</span>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:16px;font-weight:800;color:var(--accent);font-family:'DM Mono',monospace;">8106941785</span>
+                <button onclick="copyAcct()" style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:var(--accent);padding:3px 8px;border-radius:5px;font-size:10px;cursor:pointer;font-family:'DM Mono',monospace;" id="copyBtn">COPY</button>
+              </div>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.05);"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--muted);">Account Name</span>
+              <span style="font-size:13px;font-weight:700;color:var(--text);">Ogiesoba Aisosaroses</span>
+            </div>
+            <div style="height:1px;background:rgba(255,255,255,0.05);"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--muted);">Amount</span>
+              <span style="font-size:16px;font-weight:800;color:var(--accent);">₦3,000</span>
+            </div>
+          </div>
+        </div>
+        <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px 14px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.8;">
+          📌 <strong style="color:#fbbf24;">After paying:</strong> Click the WhatsApp button below and send your payment screenshot. Your account will be activated within <strong style="color:white;">5–15 minutes!</strong>
+        </div>
+        <button class="auth-btn" onclick="openWhatsApp()" style="background:#25D366;margin-bottom:10px;">📲 I Have Paid — Send Proof on WhatsApp</button>
+        <div style="text-align:center;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:4px;">🔒 Your payment is safe · Activated within 15 mins</div>
+        <div class="back-link" onclick="showAuthScreens()">← Go back</div>
+      </div>
+    </div>
+
+    <!-- PENDING SCREEN -->
+    <div class="pay-screen" id="successScreen">
+      <div class="auth-body">
+        <div class="success-screen active">
+          <span class="success-icon">⏳</span>
+          <div class="success-title">Payment Submitted!</div>
+          <div class="success-sub">We have received your WhatsApp message.<br><br>Once we confirm your ₦3,000 payment, we will send you an <strong style="color:#00ff88;">Activation Code</strong> on WhatsApp within <strong>5–15 minutes.</strong></div>
+
+          <div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left;">
+            <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;letter-spacing:2px;margin-bottom:10px;">ENTER ACTIVATION CODE</div>
+            <input type="text" id="activationCode" maxlength="8" placeholder="e.g. TF-A3K9" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:9px;font-family:DM Mono,monospace;font-size:18px;text-align:center;letter-spacing:4px;outline:none;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()"/>
+            <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;font-family:DM Mono,monospace;">Code will be sent to your WhatsApp after payment confirmation</div>
+          </div>
+
+          <button class="auth-btn" onclick="verifyCode()" style="margin-bottom:10px;">Activate My Account 🚀</button>
+          <div id="codeError" style="font-size:12px;color:#ef4444;text-align:center;min-height:18px;font-family:DM Mono,monospace;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<!-- ======= END AUTH GATE ======= -->
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-mark">Task<span>Flow</span></div>
+      <div class="logo-sub">EARN · DAILY</div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">Main</div>
+      <div class="nav-item active" onclick="setPage('dashboard')">
+        <span class="icon">⚡</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="setPage('tasks')">
+        <span class="icon">📋</span> Browse Tasks
+        <span class="nav-badge">14</span>
+      </div>
+      <div class="nav-item" onclick="setPage('wallet')">
+        <span class="icon">💳</span> Wallet
+      </div>
+      <div class="nav-item" onclick="setPage('leaderboard')">
+        <span class="icon">🏆</span> Leaderboard
+      </div>
+      <div class="nav-section">Account</div>
+      <div class="nav-item" onclick="setPage('referrals')">
+        <span class="icon">👥</span> Referrals
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item" onclick="showUpgradeModal()">
+        <span class="icon">⭐</span> Go Premium
+      </div>
+      <div class="nav-item">
+        <span class="icon">⚙️</span> Settings
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="avatar">JD</div>
+        <div class="user-info">
+          <div class="name" id="sidebarName">Welcome!</div>
+          <div class="tier" id="sidebarTier">🟢 ACTIVE MEMBER</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="page-title">Welcome, <span id="dashName">there</span> 👋</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;font-family:'DM Mono',monospace;" id="dashDate">Loading...</div>
+      </div>
+      <div class="topbar-right">
+        <div class="streak-badge">🔥 <span id="streakCount">0</span>-day streak</div>
+        <button class="wallet-btn" onclick="document.getElementById('withdrawModal').classList.add('show')"><span id="topBalance">₦0</span> Balance</button>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+      <div class="stat-card green">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Today's Earnings</div>
+        <div class="stat-value green" id="todayEarnings">₦0</div>
+        <div class="stat-change" id="todayChange">Complete tasks to earn!</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon">📋</div>
+        <div class="stat-label">Tasks Completed</div>
+        <div class="stat-value purple" id="tasksCompleted">0</div>
+        <div class="stat-change" style="color:#a78bfa;" id="tasksChange">Start your first task!</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-label">This Month</div>
+        <div class="stat-value gold" id="monthEarnings">₦0</div>
+        <div class="stat-change" style="color:var(--gold);" id="monthChange">Your journey starts now!</div>
+      </div>
+      <div class="stat-card" style="border-color:rgba(239,68,68,0.2);">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">Referral Bonus</div>
+        <div class="stat-value" style="color:#f87171;" id="referralBonus">₦0</div>
+        <div class="stat-change" style="color:#f87171;" id="referralChange">Invite friends to earn ₦500!</div>
+      </div>
+    </div>
+
+    <!-- MAIN GRID -->
+    <div class="content-grid">
+      <div class="left-col">
+
+        <!-- AVAILABLE TASKS -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Available Tasks</div>
+            <div class="panel-action" onclick="showNotif('📋 Loading all tasks...')">View All →</div>
+          </div>
+          <div class="task-filters">
+            <button class="filter-btn active" onclick="filterTasks(this,'all')">All</button>
+            <button class="filter-btn" onclick="filterTasks(this,'writing')">✍️ Writing</button>
+            <button class="filter-btn" onclick="filterTasks(this,'data')">📊 Data</button>
+            <button class="filter-btn" onclick="filterTasks(this,'social')">📱 Social</button>
+            <button class="filter-btn" onclick="filterTasks(this,'design')">🎨 Design</button>
+          </div>
+          <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:10px 16px;margin:0 16px 4px;font-size:12px;color:#fbbf24;">
+            📌 Complete each task and send screenshot proof to WhatsApp to receive your earnings
+          </div>
+          <div class="task-list">
+            <div class="task-item">
+              <div class="task-cat-icon social">📸</div>
+              <div class="task-info">
+                <div class="task-name">Post TaskFlow image on TikTok</div>
+                <div class="task-meta">
+                  <span class="task-tag tag-easy">EASY</span>
+                  <span class="task-time">⏱ ~5 min</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="task-pay">₦500</div>
+                <div class="task-slots">Unlimited</div>
+              </div>
+              <button class="start-btn" onclick="openTask('Post TaskFlow image on TikTok', '500', '~5 min', '1. Save the TaskFlow cover image
+2. Post it on your TikTok page
+3. Caption: Join TaskFlow and earn daily! Link in bio
+4. Screenshot your post and send to our WhatsApp as proof')">Start</button>
+            </div>
+            <div class="task-item">
+              <div class="task-cat-icon social">📸</div>
+              <div class="task-info">
+                <div class="task-name">Post TaskFlow image on Instagram</div>
+                <div class="task-meta">
+                  <span class="task-tag tag-easy">EASY</span>
+                  <span class="task-time">⏱ ~5 min</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="task-pay">₦500</div>
+                <div class="task-slots">Unlimited</div>
+              </div>
+              <button class="start-btn" onclick="openTask('Post TaskFlow image on Instagram', '500', '~5 min', '1. Save the TaskFlow cover image
+2. Post it on your Instagram page
+3. Caption: Earn daily with TaskFlow Nigeria!
+4. Screenshot your post and send to our WhatsApp as proof')">Start</button>
+            </div>
+            <div class="task-item">
+              <div class="task-cat-icon social">📸</div>
+              <div class="task-info">
+                <div class="task-name">Post TaskFlow on WhatsApp Status</div>
+                <div class="task-meta">
+                  <span class="task-tag tag-easy">EASY</span>
+                  <span class="task-time">⏱ ~2 min</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="task-pay">₦300</div>
+                <div class="task-slots">Unlimited</div>
+              </div>
+              <button class="start-btn" onclick="openTask('Post TaskFlow on WhatsApp Status', '300', '~2 min', '1. Save the TaskFlow cover image
+2. Post it as your WhatsApp status
+3. Screenshot showing the status is live
+4. Send screenshot to our WhatsApp as proof')">Start</button>
+            </div>
+            <div class="task-item">
+              <div class="task-cat-icon social">🎬</div>
+              <div class="task-info">
+                <div class="task-name">Create a TikTok video about TaskFlow</div>
+                <div class="task-meta">
+                  <span class="task-tag tag-medium">MEDIUM</span>
+                  <span class="task-time">⏱ ~20 min</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="task-pay">₦1,500</div>
+                <div class="task-slots">Unlimited</div>
+              </div>
+              <button class="start-btn" onclick="openTask('Create a TikTok video about TaskFlow', '1500', '~20 min', '1. Record a short TikTok video talking about TaskFlow
+2. Show how people can earn money on the app
+3. Add the app link in your bio
+4. Post the video and send the link to our WhatsApp as proof')">Start</button>
+            </div>
+            <div class="task-item">
+              <div class="task-cat-icon social">👍</div>
+              <div class="task-info">
+                <div class="task-name">Follow & Like our TikTok page</div>
+                <div class="task-meta">
+                  <span class="task-tag tag-easy">EASY</span>
+                  <span class="task-time">⏱ ~2 min</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="task-pay">₦200</div>
+                <div class="task-slots">One time</div>
+              </div>
+              <button class="start-btn" onclick="openTask('Follow & Like our TikTok page', '200', '~2 min', '1. Go to TikTok and search @taskflowng
+2. Follow the page
+3. Like the 3 most recent posts
+4. Screenshot showing you followed and liked
+5. Send screenshot to our WhatsApp as proof')">Start</button>
+            </div>
+            <div class="task-item">
+              <div class="task-cat-icon social">👥</div>
+              <div class="task-info">
+                <div class="task-name">Refer a friend to TaskFlow</div>
+                <div class="task-meta">
+                  <span class="task-tag tag-easy">EASY</span>
+                  <span class="task-time">⏱ Anytime</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <div class="task-pay">₦400</div>
+                <div class="task-slots">Per referral</div>
+              </div>
+              <button class="start-btn" onclick="openReferral()">Refer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- EARNINGS CHART -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Weekly Earnings</div>
+            <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);">₦139,490 this week</div>
+          </div>
+          <div class="chart-area">
+            <div class="chart-bars">
+              <div class="bar-wrap"><div class="bar filled" style="height:55px;"></div><div class="bar-label">Mon</div></div>
+              <div class="bar-wrap"><div class="bar filled" style="height:38px;"></div><div class="bar-label">Tue</div></div>
+              <div class="bar-wrap"><div class="bar filled" style="height:72px;"></div><div class="bar-label">Wed</div></div>
+              <div class="bar-wrap"><div class="bar filled" style="height:45px;"></div><div class="bar-label">Thu</div></div>
+              <div class="bar-wrap"><div class="bar filled" style="height:88px;"></div><div class="bar-label">Fri</div></div>
+              <div class="bar-wrap"><div class="bar filled" style="height:62px;"></div><div class="bar-label">Sat</div></div>
+              <div class="bar-wrap"><div class="bar today" style="height:18px;position:relative;"><div style="position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--accent);font-family:'DM Mono',monospace;white-space:nowrap;">TODAY</div></div><div class="bar-label">Sun</div></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">
+              <span>$0</span><span>$10</span><span>$20</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="right-col">
+
+        <!-- WALLET -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">💳 Wallet</div>
+          </div>
+          <div class="wallet-panel">
+            <div class="wallet-balance">
+              <div class="wallet-label">AVAILABLE BALANCE</div>
+              <div class="wallet-amount" id="walletBalance">₦0</div>
+              <div class="wallet-pending" id="walletPending">Complete tasks to earn</div>
+              <div class="wallet-actions">
+                <button class="w-btn w-btn-primary" onclick="document.getElementById('withdrawModal').classList.add('show')">Withdraw</button>
+                <button class="w-btn w-btn-secondary" onclick="showNotif('📊 History loaded')">History</button>
+              </div>
+            </div>
+            <div class="tx-title">Recent Transactions</div>
+            <div id="txList">
+              <div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;font-family:'DM Mono',monospace;">
+                No transactions yet.<br>Complete tasks to see earnings here!
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DAILY GOAL -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">🎯 Daily Goal</div>
+            <div class="panel-action" onclick="showNotif('⚙️ Goal settings opened')">Edit</div>
+          </div>
+          <div class="daily-goal">
+            <div class="dg-header">
+              <div class="dg-title">₦5,000 daily target</div>
+              <div class="dg-amount" id="goalAmount">₦0 / ₦5,000</div>
+            </div>
+            <div class="dg-bar"><div class="dg-fill" id="goalFill" style="width:0%"></div></div>
+            <div class="dg-sub" id="goalSub">0% complete · Start your first task!</div>
+          </div>
+          <div class="progress-section">
+            <div class="prog-item">
+              <div class="prog-header">
+                <span class="prog-name">Tasks today</span>
+                <span class="prog-val" id="taskProgress">0 / 5</span>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" id="taskProgressBar" style="width:0%;background:linear-gradient(to right,var(--accent2),var(--accent));"></div></div>
+            </div>
+            <div class="prog-item">
+              <div class="prog-header">
+                <span class="prog-name">Weekly earnings</span>
+                <span class="prog-val" id="weekProgress">₦0 / ₦50,000</span>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" id="weekProgressBar" style="width:0%;background:linear-gradient(to right,#4c1d95,var(--accent2));"></div></div>
+            </div>
+            <div class="prog-item">
+              <div class="prog-header">
+                <span class="prog-name">Monthly goal</span>
+                <span class="prog-val" id="monthProgress">₦0 / ₦200,000</span>
+              </div>
+              <div class="prog-bar"><div class="prog-fill" id="monthProgressBar" style="width:0%;background:linear-gradient(to right,#92400e,var(--gold));"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEADERBOARD -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">🏆 Top Earners</div>
+            <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">This week</div>
+          </div>
+          <div class="leaderboard-list">
+            <div class="lb-item">
+              <div class="lb-rank rank-1">🥇</div>
+              <div class="lb-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">SM</div>
+              <div class="lb-info">
+                <div class="lb-name">Sarah M.</div>
+                <div class="lb-tasks">89 tasks</div>
+              </div>
+              <div class="lb-earn">₦42,500</div>
+            </div>
+            <div class="lb-item">
+              <div class="lb-rank rank-2">🥈</div>
+              <div class="lb-avatar" style="background:linear-gradient(135deg,#3b82f6,#7c3aed);">AK</div>
+              <div class="lb-info">
+                <div class="lb-name">Alex K.</div>
+                <div class="lb-tasks">74 tasks</div>
+              </div>
+              <div class="lb-earn">₦38,200</div>
+            </div>
+            <div class="lb-item">
+              <div class="lb-rank rank-3">🥉</div>
+              <div class="lb-avatar" style="background:linear-gradient(135deg,#10b981,#3b82f6);">RL</div>
+              <div class="lb-info">
+                <div class="lb-name">Rita L.</div>
+                <div class="lb-tasks">68 tasks</div>
+              </div>
+              <div class="lb-earn">₦31,750</div>
+            </div>
+            <div class="lb-item" style="background:rgba(0,255,136,0.04);border-left:3px solid var(--accent);">
+              <div class="lb-rank rank-other">#4</div>
+              <div class="lb-avatar" style="background:linear-gradient(135deg,var(--accent2),var(--accent));">JD</div>
+              <div class="lb-info">
+                <div class="lb-name" id="lbYourName">You <span class="you-badge">YOU</span></div>
+                <div class="lb-tasks" id="lbYourTasks">0 tasks</div>
+              </div>
+              <div class="lb-earn" id="lbYourEarn">₦0</div>
+            </div>
+            <div class="lb-item">
+              <div class="lb-rank rank-other">#5</div>
+              <div class="lb-avatar" style="background:linear-gradient(135deg,#ec4899,#8b5cf6);">TN</div>
+              <div class="lb-info">
+                <div class="lb-name">Tom N.</div>
+                <div class="lb-tasks">47 tasks</div>
+              </div>
+              <div class="lb-earn">₦24,100</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- TASK MODAL -->
+<div class="modal-overlay" id="taskModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('taskModal')">✕</button>
+    <div class="modal-title" id="modalTaskName">Task Name</div>
+    <div class="modal-sub">Complete this task to earn your reward instantly</div>
+    <div class="modal-pay">
+      <div>
+        <div class="modal-pay-label">YOUR REWARD</div>
+        <div class="modal-pay-amount" id="modalPay">$0.00</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="modal-pay-label">ESTIMATED TIME</div>
+        <div style="font-size:16px;font-weight:700;font-family:'DM Mono',monospace;" id="modalTime">—</div>
+      </div>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:20px;">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;font-family:DM Mono,monospace;letter-spacing:1px;">HOW TO COMPLETE THIS TASK</div>
+      <div style="font-size:13px;line-height:1.8;color:rgba(255,255,255,0.75);" id="modalInstructions">Follow the task instructions carefully and send your screenshot proof on WhatsApp.</div>
+    </div>
+    <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#fbbf24;">
+      📌 After completing the task, click below to send your proof on WhatsApp. Your earnings will be credited within 1 hour.
+    </div>
+    <button class="modal-btn" onclick="acceptTask()">📲 Done — Send Proof on WhatsApp</button>
+  </div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div class="modal-overlay" id="upgradeModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('upgradeModal')">✕</button>
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:40px;margin-bottom:8px;">⭐</div>
+      <div class="modal-title">Go Premium</div>
+      <div class="modal-sub">Unlock higher-paying tasks & exclusive features</div>
+    </div>
+    <div style="display:grid;gap:10px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="color:var(--accent);">✓</span> Access to premium tasks (up to ₦77,850/task)</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="color:var(--accent);">✓</span> Priority task queue — first access</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="color:var(--accent);">✓</span> Free withdrawals (normally ₦780 fee)</div>
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;"><span style="color:var(--accent);">✓</span> 2x referral bonus earnings</div>
+    </div>
+    <div style="background:var(--surface2);border-radius:10px;padding:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:12px;color:var(--muted);">MONTHLY PLAN</div>
+        <div style="font-size:24px;font-weight:800;">$9.99<span style="font-size:13px;color:var(--muted);font-weight:400;">/mo</span></div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;color:var(--accent);">Avg. extra earnings</div>
+        <div style="font-size:18px;font-weight:800;color:var(--accent);">+₦124,560–186,840/mo</div>
+      </div>
+    </div>
+    <button class="modal-btn" onclick="closeModal('upgradeModal');showNotif('⭐ Premium activated! Welcome to Pro!')">Upgrade Now — ₦15,500/mo</button>
+  </div>
+</div>
+
+<!-- WITHDRAW MODAL -->
+<div class="modal-overlay" id="withdrawModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('withdrawModal')">✕</button>
+    <div class="modal-title">💸 Withdraw Funds</div>
+    <div class="modal-sub">Funds sent directly to your Nigerian bank account</div>
+    <div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:10px;padding:14px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+      <div>
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">AVAILABLE TO WITHDRAW</div>
+        <div style="font-size:24px;font-weight:800;color:var(--accent);">₦385,200</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">MIN. WITHDRAWAL</div>
+        <div style="font-size:16px;font-weight:700;">₦5,000</div>
+      </div>
+    </div>
+    <div style="display:grid;gap:12px;margin-bottom:20px;">
+      <div>
+        <label style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px;display:block;margin-bottom:6px;">SELECT BANK</label>
+        <select id="bankSelect" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:8px;font-family:'Syne',sans-serif;font-size:13px;outline:none;cursor:pointer;">
+          <option value="">-- Choose your bank --</option>
+          <option>Access Bank</option>
+          <option>First Bank of Nigeria</option>
+          <option>Guaranty Trust Bank (GTB)</option>
+          <option>Zenith Bank</option>
+          <option>United Bank for Africa (UBA)</option>
+          <option>Fidelity Bank</option>
+          <option>Opay</option>
+          <option>Kuda Bank</option>
+          <option>Palmpay</option>
+          <option>Moniepoint</option>
+          <option>Sterling Bank</option>
+          <option>Wema Bank / ALAT</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px;display:block;margin-bottom:6px;">ACCOUNT NUMBER</label>
+        <input id="acctNum" type="text" maxlength="10" placeholder="0123456789" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:8px;font-family:'DM Mono',monospace;font-size:14px;outline:none;" oninput="verifyAccount(this.value)"/>
+        <div id="acctName" style="font-size:12px;color:var(--accent);margin-top:6px;font-family:'DM Mono',monospace;min-height:18px;"></div>
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:1px;display:block;margin-bottom:6px;">AMOUNT (₦)</label>
+        <input id="withdrawAmt" type="number" placeholder="e.g. 50000" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 14px;border-radius:8px;font-family:'DM Mono',monospace;font-size:14px;outline:none;"/>
+      </div>
+    </div>
+    <div style="background:var(--surface2);border-radius:8px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:var(--muted);line-height:1.7;">
+      💡 <strong style="color:var(--text);">Withdrawal fee: ₦100 flat</strong> per transaction (Free for Premium members)<br>
+      ⏱ Processing: <strong style="color:var(--text);">Instant – 24 hours</strong> depending on your bank
+    </div>
+    <button class="modal-btn" onclick="submitWithdraw()">Confirm Withdrawal</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif">
+  <div class="notif-icon">✅</div>
+  <div class="notif-text">
+    <div class="notif-title" id="notifTitle">Success!</div>
+    <div class="notif-sub" id="notifSub">Action completed</div>
+  </div>
+</div>
+
+<script>
+  function setPage(page) {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    showNotif('📄 Loading ' + page + '...');
+  }
+
+  function filterTasks(btn, cat) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    showNotif('🔍 Filtered: ' + (cat === 'all' ? 'All tasks' : cat));
+  }
+
+  function openTask(name, payRaw, time, instructions) {
+    const payNum = parseInt(payRaw.replace(/[^0-9]/g,''));
+    document.getElementById('modalTaskName').textContent = name;
+    document.getElementById('modalPay').textContent = '₦' + payNum.toLocaleString();
+    document.getElementById('modalTime').textContent = time;
+    // Show instructions
+    const instrEl = document.getElementById('modalInstructions');
+    if (instrEl && instructions) {
+      instrEl.innerHTML = instructions.split('\n').map(l => '<div style="padding:3px 0;">'+l+'</div>').join('');
+    }
+    currentTaskPay = payNum;
+    currentTaskName = name;
+    document.getElementById('taskModal').classList.add('show');
+  }
+
+  function openReferral() {
+    const name = userState.name || 'Friend';
+    const msg = encodeURIComponent('Hey! Join TaskFlow Nigeria and start earning daily!\nRegister here: [YOUR APP LINK]\nUse my referral: ' + (userState.referralCode || 'TF-' + Math.random().toString(36).substr(2,6).toUpperCase()));
+    window.open('https://wa.me/?text=' + msg, '_blank');
+    showNotif('📲 Share your referral link!', 'Earn ₦400 for every friend who registers');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+
+  function acceptTask() {
+    const taskName = document.getElementById('modalTaskName').textContent;
+    const payText = document.getElementById('modalPay').textContent;
+    const amount = parseInt(payText.replace(/[₦,]/g, ''));
+    closeModal('taskModal');
+    // Open WhatsApp to send proof
+    const msg = encodeURIComponent(
+      'Hi TaskFlow! I just completed this task and I am sending my proof.\n\n' +
+      'Task: ' + taskName + '\n' +
+      'Reward: ' + payText + '\n' +
+      'Name: ' + (userState.name || '') + '\n\n' +
+      '[Please find my screenshot attached]'
+    );
+    window.open('https://wa.me/2348129322404?text=' + msg, '_blank');
+    showNotif('📲 Send your proof on WhatsApp!', 'We will credit ' + payText + ' after verification');
+  }
+
+  function showUpgradeModal() {
+    document.getElementById('upgradeModal').classList.add('show');
+  }
+
+  let notifTimeout;
+  function showNotif(title, sub) {
+    const notif = document.getElementById('notif');
+    document.getElementById('notifTitle').textContent = title;
+    document.getElementById('notifSub').textContent = sub || 'TaskFlow Platform';
+    notif.classList.add('show');
+    clearTimeout(notifTimeout);
+    notifTimeout = setTimeout(() => notif.classList.remove('show'), 3000);
+  }
+
+  function verifyAccount(val) {
+    const el = document.getElementById('acctName');
+    if (val.length === 10) {
+      el.textContent = '✓ Account verified: JOHN DOE';
+    } else {
+      el.textContent = val.length > 0 ? 'Enter 10-digit account number...' : '';
+    }
+  }
+
+  function submitWithdraw() {
+    const bank = document.getElementById('bankSelect').value;
+    const acct = document.getElementById('acctNum').value;
+    const amt = document.getElementById('withdrawAmt').value;
+    if (!bank) { showNotif('❌ Please select your bank', 'Required field'); return; }
+    if (acct.length !== 10) { showNotif('❌ Invalid account number', 'Must be 10 digits'); return; }
+    if (!amt || parseInt(amt) < 5000) { showNotif('❌ Minimum withdrawal is ₦5,000', 'Enter a valid amount'); return; }
+    closeModal('withdrawModal');
+    showNotif('✅ Withdrawal of ₦' + parseInt(amt).toLocaleString() + ' submitted!', 'Processing to ' + bank + ' · Est. 1–24hrs');
+  }
+
+  
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('show');
+    });
+  });
+
+  // ===== USER STATE =====
+  let userState = {
+    name: '',
+    email: '',
+    balance: 0,
+    todayEarnings: 0,
+    tasksCompleted: 0,
+    monthEarnings: 0,
+    weekEarnings: 0,
+    referralBonus: 0,
+    streak: 0,
+    transactions: [],
+    referralCode: ''
+  };
+  let currentTaskPay = 0;
+  let currentTaskName = '';
+
+  function formatNaira(amount) {
+    return '₦' + amount.toLocaleString('en-NG');
+  }
+
+  function updateDashboard() {
+    const firstName = userState.name.split(' ')[0];
+    const now = new Date();
+    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    // Topbar
+    document.getElementById('dashName').textContent = firstName;
+    document.getElementById('dashDate').textContent =
+      days[now.getDay()] + ', ' + now.getDate() + ' ' + months[now.getMonth()] +
+      ' · ' + userState.tasksCompleted + ' tasks completed today';
+    document.getElementById('topBalance').textContent = formatNaira(userState.balance);
+    document.getElementById('streakCount').textContent = userState.streak;
+
+    // Sidebar
+    document.getElementById('sidebarName').textContent = userState.name || 'Welcome!';
+
+    // Stat cards
+    document.getElementById('todayEarnings').textContent = formatNaira(userState.todayEarnings);
+    document.getElementById('todayChange').textContent = userState.todayEarnings > 0 ? '↑ Keep going!' : 'Complete tasks to earn!';
+    document.getElementById('tasksCompleted').textContent = userState.tasksCompleted;
+    document.getElementById('tasksChange').textContent = userState.tasksCompleted > 0 ? '↑ Great work!' : 'Start your first task!';
+    document.getElementById('monthEarnings').textContent = formatNaira(userState.monthEarnings);
+    document.getElementById('monthChange').textContent = userState.monthEarnings > 0 ? '↑ Keep earning!' : 'Your journey starts now!';
+    document.getElementById('referralBonus').textContent = formatNaira(userState.referralBonus);
+    document.getElementById('referralChange').textContent = userState.referralBonus > 0 ? userState.referralBonus/500 + ' active referrals' : 'Invite friends to earn ₦500!';
+
+    // Wallet
+    document.getElementById('walletBalance').textContent = formatNaira(userState.balance);
+    document.getElementById('walletPending').textContent = userState.tasksCompleted > 0 ? '✓ All earnings confirmed' : 'Complete tasks to earn';
+
+    // Transactions
+    const txList = document.getElementById('txList');
+    if (userState.transactions.length === 0) {
+      txList.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px;font-family:DM Mono,monospace;">No transactions yet.<br>Complete tasks to see earnings here!</div>';
+    } else {
+      txList.innerHTML = userState.transactions.slice().reverse().map(tx => `
+        <div class="tx-item">
+          <div class="tx-left">
+            <div class="tx-name">${tx.name}</div>
+            <div class="tx-date">${tx.date}</div>
+          </div>
+          <div class="tx-amount ${tx.amount > 0 ? 'plus' : 'minus'}">${tx.amount > 0 ? '+' : ''}${formatNaira(tx.amount)}</div>
+        </div>`).join('');
+    }
+
+    // Daily goal
+    const goalPct = Math.min(100, Math.round((userState.todayEarnings / 5000) * 100));
+    document.getElementById('goalAmount').textContent = formatNaira(userState.todayEarnings) + ' / ₦5,000';
+    document.getElementById('goalFill').style.width = goalPct + '%';
+    document.getElementById('goalSub').textContent = goalPct + '% complete · ' + (goalPct < 100 ? formatNaira(5000 - userState.todayEarnings) + ' remaining' : 'Daily goal reached! 🎉');
+
+    // Progress bars
+    document.getElementById('taskProgress').textContent = userState.tasksCompleted + ' / 5';
+    document.getElementById('taskProgressBar').style.width = Math.min(100, (userState.tasksCompleted/5)*100) + '%';
+    document.getElementById('weekProgress').textContent = formatNaira(userState.weekEarnings) + ' / ₦50,000';
+    document.getElementById('weekProgressBar').style.width = Math.min(100, (userState.weekEarnings/50000)*100) + '%';
+    document.getElementById('monthProgress').textContent = formatNaira(userState.monthEarnings) + ' / ₦200,000';
+    document.getElementById('monthProgressBar').style.width = Math.min(100, (userState.monthEarnings/200000)*100) + '%';
+
+    // Leaderboard
+    document.getElementById('lbYourName').innerHTML = firstName + ' <span class="you-badge">YOU</span>';
+    document.getElementById('lbYourTasks').textContent = userState.tasksCompleted + ' tasks';
+    document.getElementById('lbYourEarn').textContent = formatNaira(userState.monthEarnings);
+  }
+
+  function addEarning(taskName, amount) {
+    userState.balance += amount;
+    userState.todayEarnings += amount;
+    userState.monthEarnings += amount;
+    userState.weekEarnings += amount;
+    userState.tasksCompleted += 1;
+    if (userState.tasksCompleted === 1) userState.streak = 1;
+    const now = new Date();
+    userState.transactions.push({
+      name: taskName,
+      date: 'Today, ' + now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0') + ' ' + (now.getHours() >= 12 ? 'PM' : 'AM'),
+      amount: amount
+    });
+    updateDashboard();
+  }
+
+  // ===== AUTH GATE LOGIC =====
+  let selectedPM = 'paystack';
+  let currentUser = null;
+
+  const payInstructions = {
+    paystack: '💳 You will be redirected to Paystack secure checkout to pay with card or bank account.',
+    transfer: '🏦 Transfer ₦3,000 to:\nBank: Guaranty Trust Bank\nAccount: 0123456789\nName: TaskFlow Nigeria Ltd\nSend proof to: pay@taskflow.ng',
+    opay: '📱 Open your Opay app → Send Money → Enter: 0123456789 (TaskFlow Nigeria) → Amount: ₦3,000',
+    ussd: '📞 Dial *737*1*3000*0123456789# (GTB)\nor *919*Amount*AccountNumber# (UBA)\nor *894*Amount*AccountNumber# (Access)'
+  };
+
+  function switchAuthTab(tab) {
+    document.querySelectorAll('.auth-tab').forEach((t,i) => t.classList.toggle('active', (tab==='login'&&i===0)||(tab==='register'&&i===1)));
+    document.getElementById('loginScreen').classList.toggle('active', tab==='login');
+    document.getElementById('registerScreen').classList.toggle('active', tab==='register');
+  }
+
+  function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    if (!email || !pass) { showAuthError('Please fill in all fields'); return; }
+    // Simulate login success
+    enterDashboard();
+  }
+
+  function doRegister() {
+    const first = document.getElementById('regFirst').value.trim();
+    const last = document.getElementById('regLast').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const pass = document.getElementById('regPass').value;
+    if (!first || !last || !email || !phone || !pass) { showAuthError('Please fill in all required fields'); return; }
+    if (pass.length < 6) { showAuthError('Password must be at least 6 characters'); return; }
+    currentUser = { name: first + ' ' + last, email, phone };
+    // Show payment screen
+    document.getElementById('authTabs').style.display = 'none';
+    document.getElementById('authBody').style.display = 'none';
+    document.getElementById('payScreen').classList.add('active');
+  }
+
+  function showAuthScreens() {
+    document.getElementById('authTabs').style.display = 'flex';
+    document.getElementById('authBody').style.display = 'block';
+    document.getElementById('payScreen').classList.remove('active');
+  }
+
+  function selectPM(method) {
+    selectedPM = method;
+    document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
+    document.getElementById('pm-' + method).classList.add('selected');
+    document.getElementById('payInstructions').innerHTML = payInstructions[method].replace(/\n/g, '<br>');
+  }
+
+  function doPayment() {
+    if (!currentUser) { showAuthError('Session expired. Please register again.'); return; }
+
+    // ⚠️ REPLACE THIS WITH YOUR REAL PAYSTACK PUBLIC KEY from paystack.com/dashboard
+    const PAYSTACK_PUBLIC_KEY = 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+
+    const handler = PaystackPop.setup({
+      key: PAYSTACK_PUBLIC_KEY,
+      email: currentUser.email,
+      amount: 300000, // Amount in KOBO (₦3,000 × 100 = 300,000 kobo)
+      currency: 'NGN',
+      ref: 'TF-' + Date.now() + '-' + Math.floor(Math.random() * 99999),
+      metadata: {
+        custom_fields: [
+          { display_name: 'Full Name', variable_name: 'full_name', value: currentUser.name },
+          { display_name: 'Phone', variable_name: 'phone', value: currentUser.phone }
+        ]
+      },
+      callback: function(response) {
+        // ✅ Payment successful — response.reference is the transaction ID
+        console.log('Payment success! Reference:', response.reference);
+        // In production: send response.reference to your backend to verify with Paystack API
+        document.getElementById('payScreen').classList.remove('active');
+        document.getElementById('successScreen').classList.add('active');
+        launchConfetti();
+      },
+      onClose: function() {
+        showNotif('⚠️ Payment cancelled', 'Complete payment to activate your account');
+      }
+    });
+
+    handler.openIframe();
+  }
+
+  function enterDashboard() {
+    if (currentUser) {
+      userState.name = currentUser.name;
+      userState.email = currentUser.email;
+      userState.referralCode = 'TF-' + currentUser.name.replace(/\s/g,'').substr(0,3).toUpperCase() + Math.floor(Math.random()*900+100);
+    }
+    document.getElementById('authGate').classList.add('hidden');
+    updateDashboard();
+    setTimeout(() => showNotif('👋 Welcome to TaskFlow, ' + (currentUser ? currentUser.name.split(' ')[0] : '') + '!', 'Complete tasks to start earning!'), 500);
+  }
+
+  function copyAcct() {
+    navigator.clipboard.writeText('8106941785').then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = 'COPIED!';
+      btn.style.background = 'rgba(0,255,136,0.3)';
+      setTimeout(() => { btn.textContent = 'COPY'; btn.style.background = 'rgba(0,255,136,0.1)'; }, 2000);
+    });
+  }
+
+  function openWhatsApp() {
+    const name = currentUser ? currentUser.name : 'New User';
+    const email = currentUser ? currentUser.email : '';
+    const msg = encodeURIComponent(
+      "Hi TaskFlow! I just paid ₦3,000 for account activation.\n\n" +
+      "Name: " + name + "\n" +
+      "Email: " + email + "\n\n" +
+      "Please find my payment screenshot attached. Kindly send me my Activation Code. Thank you!"
+    );
+    window.open('https://wa.me/2348129322404?text=' + msg, '_blank');
+    document.getElementById('payScreen').classList.remove('active');
+    document.getElementById('successScreen').classList.add('active');
+  }
+
+  // Secret codes — you send these manually on WhatsApp after confirming payment
+  // Generate a new one for each user: TF- followed by any 4 characters e.g TF-X7K2
+  const VALID_CODES = new Set();
+  // Add some pre-set codes you can give to users (you can change these anytime)
+  ['TF-A1B2','TF-C3D4','TF-E5F6','TF-G7H8','TF-J9K1','TF-L2M3',
+   'TF-N4P5','TF-Q6R7','TF-S8T9','TF-U1V2','TF-W3X4','TF-Y5Z6',
+   'TF-AB12','TF-CD34','TF-EF56','TF-GH78','TF-JK90','TF-LM11'].forEach(c => VALID_CODES.add(c));
+
+  function verifyCode() {
+    const code = document.getElementById('activationCode').value.trim().toUpperCase();
+    const errEl = document.getElementById('codeError');
+    if (!code) { errEl.textContent = 'Please enter your activation code'; return; }
+    if (code.length < 6) { errEl.textContent = 'Code must be at least 6 characters'; return; }
+    if (VALID_CODES.has(code)) {
+      VALID_CODES.delete(code); // Each code works only once
+      errEl.textContent = '';
+      enterDashboard();
+      launchConfetti();
+    } else {
+      errEl.textContent = '❌ Invalid or already used code. Check your WhatsApp.';
+    }
+  }
+
+  function showAuthError(msg) {
+    showNotif('❌ ' + msg, 'Please check your details');
+  }
+
+  function launchConfetti() {
+    const colors = ['#00ff88','#7c3aed','#fbbf24','#ef4444','#3b82f6'];
+    for (let i = 0; i < 60; i++) {
+      const el = document.createElement('div');
+      el.style.cssText = `position:fixed;width:8px;height:8px;border-radius:2px;z-index:10000;pointer-events:none;
+        background:${colors[Math.floor(Math.random()*colors.length)]};
+        left:${Math.random()*100}vw;top:-10px;
+        animation:fall ${1.5+Math.random()*2}s ease-in ${Math.random()*0.5}s forwards;`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 4000);
+    }
+    const style = document.createElement('style');
+    style.textContent = '@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0;}}';
+    document.head.appendChild(style);
+  }
+
+  // ===== END AUTH GATE LOGIC =====
+
+  // Welcome notification on load
+  setTimeout(() => showNotif('👋 Welcome back, John!', '3 new high-paying tasks available'), 800);
+</script>
+</body>
+</html>

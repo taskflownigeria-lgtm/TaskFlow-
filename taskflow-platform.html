@@ -951,10 +951,7 @@
                 <div class="task-pay">₦500</div>
                 <div class="task-slots">Unlimited</div>
               </div>
-              <button class="start-btn" onclick="openTask('Post TaskFlow image on TikTok', '500', '~5 min', '1. Save the TaskFlow cover image
-2. Post it on your TikTok page
-3. Caption: Join TaskFlow and earn daily! Link in bio
-4. Screenshot your post and send to our WhatsApp as proof')">Start</button>
+              <button class="start-btn" onclick="doTask('Post TaskFlow image on TikTok',500)">Start</button>
             </div>
             <div class="task-item">
               <div class="task-cat-icon social">📸</div>
@@ -969,10 +966,7 @@
                 <div class="task-pay">₦500</div>
                 <div class="task-slots">Unlimited</div>
               </div>
-              <button class="start-btn" onclick="openTask('Post TaskFlow image on Instagram', '500', '~5 min', '1. Save the TaskFlow cover image
-2. Post it on your Instagram page
-3. Caption: Earn daily with TaskFlow Nigeria!
-4. Screenshot your post and send to our WhatsApp as proof')">Start</button>
+              <button class="start-btn" onclick="doTask('Post TaskFlow image on Instagram',500)">Start</button>
             </div>
             <div class="task-item">
               <div class="task-cat-icon social">📸</div>
@@ -987,10 +981,7 @@
                 <div class="task-pay">₦300</div>
                 <div class="task-slots">Unlimited</div>
               </div>
-              <button class="start-btn" onclick="openTask('Post TaskFlow on WhatsApp Status', '300', '~2 min', '1. Save the TaskFlow cover image
-2. Post it as your WhatsApp status
-3. Screenshot showing the status is live
-4. Send screenshot to our WhatsApp as proof')">Start</button>
+              <button class="start-btn" onclick="doTask('Post TaskFlow on WhatsApp Status',300)">Start</button>
             </div>
             <div class="task-item">
               <div class="task-cat-icon social">🎬</div>
@@ -1005,10 +996,7 @@
                 <div class="task-pay">₦1,500</div>
                 <div class="task-slots">Unlimited</div>
               </div>
-              <button class="start-btn" onclick="openTask('Create a TikTok video about TaskFlow', '1500', '~20 min', '1. Record a short TikTok video talking about TaskFlow
-2. Show how people can earn money on the app
-3. Add the app link in your bio
-4. Post the video and send the link to our WhatsApp as proof')">Start</button>
+              <button class="start-btn" onclick="doTask('Create a TikTok video about TaskFlow',1500)">Start</button>
             </div>
             <div class="task-item">
               <div class="task-cat-icon social">👍</div>
@@ -1023,11 +1011,7 @@
                 <div class="task-pay">₦200</div>
                 <div class="task-slots">One time</div>
               </div>
-              <button class="start-btn" onclick="openTask('Follow & Like our TikTok page', '200', '~2 min', '1. Go to TikTok and search @taskflowng
-2. Follow the page
-3. Like the 3 most recent posts
-4. Screenshot showing you followed and liked
-5. Send screenshot to our WhatsApp as proof')">Start</button>
+              <button class="start-btn" onclick="doTask('Follow and Like our TikTok page',200)">Start</button>
             </div>
             <div class="task-item">
               <div class="task-cat-icon social">👥</div>
@@ -1481,23 +1465,21 @@ window.onerror = function(msg, src, line) { console.log('Error:', msg, line); re
   }
 
   function openTask(name, payRaw, time, instructions) {
-    try {
-      var payNum = parseInt((payRaw || '0').toString().replace(/[^0-9]/g,'')) || 0;
-      var modalName = document.getElementById('modalTaskName');
-      var modalPay = document.getElementById('modalPay');
-      var modalTime = document.getElementById('modalTime');
-      var instrEl = document.getElementById('modalInstructions');
-      if(modalName) modalName.textContent = name;
-      if(modalPay) modalPay.textContent = '₦' + payNum.toLocaleString();
-      if(modalTime) modalTime.textContent = time || '';
-      if(instrEl && instructions) {
-        instrEl.innerHTML = instructions.split('\n').map(function(l){ return '<div style="padding:3px 0;">'+l+'</div>'; }).join('');
-      }
-      currentTaskPay = payNum;
-      currentTaskName = name;
-      var modal = document.getElementById('taskModal');
-      if(modal) modal.classList.add('show');
-    } catch(e) { console.log('openTask error:', e); }
+    doTask(name, parseInt((payRaw||'0').toString().replace(/[^0-9]/g,''))||0);
+  }
+
+  function doTask(name, pay) {
+    var userName = userState.name || 'Member';
+    var msg = encodeURIComponent(
+      'Hi TaskFlow! I completed a task and I am sending my proof.\n\n' +
+      'Task: ' + name + '\n' +
+      'Reward: ₦' + pay.toLocaleString() + '\n' +
+      'My Name: ' + userName + '\n\n' +
+      'Please find my screenshot attached below 👇'
+    );
+    var waUrl = 'https://wa.me/2348129322404?text=' + msg;
+    window.open(waUrl, '_blank');
+    showNotif('📲 WhatsApp opened!', 'Send your screenshot to get ₦' + pay.toLocaleString() + ' credit');
   }
 
   function openReferral() {

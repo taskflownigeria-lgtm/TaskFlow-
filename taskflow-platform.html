@@ -809,12 +809,11 @@
 
           <div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left;">
             <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;letter-spacing:2px;margin-bottom:10px;">ENTER ACTIVATION CODE</div>
-            <input type="text" id="activationCode" maxlength="20" placeholder="Enter code here" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:9px;font-family:DM Mono,monospace;font-size:18px;text-align:center;letter-spacing:2px;outline:none;" />
-            <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;font-family:DM Mono,monospace;">Code will be sent to your WhatsApp after payment confirmation</div>
+            <input type="text" id="activationCode" maxlength="20" placeholder="e.g. TF-A1B2" style="width:100%;background:var(--surface2);border:1px solid rgba(0,255,136,0.4);color:white;padding:14px;border-radius:9px;font-family:DM Mono,monospace;font-size:20px;text-align:center;letter-spacing:3px;outline:none;box-sizing:border-box;" />
+            <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;">Code sent to your WhatsApp after payment</div>
           </div>
-
           <button class="auth-btn" onclick="verifyCode()" style="margin-bottom:10px;">Activate My Account 🚀</button>
-          <div id="codeError" style="font-size:12px;color:#ef4444;text-align:center;min-height:18px;font-family:DM Mono,monospace;padding:4px;"></div>
+          <div id="codeError" style="font-size:13px;text-align:center;min-height:20px;font-family:DM Mono,monospace;padding:6px;"></div>
         </div>
       </div>
     </div>
@@ -1482,18 +1481,23 @@ window.onerror = function(msg, src, line) { console.log('Error:', msg, line); re
   }
 
   function openTask(name, payRaw, time, instructions) {
-    const payNum = parseInt(payRaw.replace(/[^0-9]/g,''));
-    document.getElementById('modalTaskName').textContent = name;
-    document.getElementById('modalPay').textContent = '₦' + payNum.toLocaleString();
-    document.getElementById('modalTime').textContent = time;
-    // Show instructions
-    const instrEl = document.getElementById('modalInstructions');
-    if (instrEl && instructions) {
-      instrEl.innerHTML = instructions.split('\n').map(l => '<div style="padding:3px 0;">'+l+'</div>').join('');
-    }
-    currentTaskPay = payNum;
-    currentTaskName = name;
-    document.getElementById('taskModal').classList.add('show');
+    try {
+      var payNum = parseInt((payRaw || '0').toString().replace(/[^0-9]/g,'')) || 0;
+      var modalName = document.getElementById('modalTaskName');
+      var modalPay = document.getElementById('modalPay');
+      var modalTime = document.getElementById('modalTime');
+      var instrEl = document.getElementById('modalInstructions');
+      if(modalName) modalName.textContent = name;
+      if(modalPay) modalPay.textContent = '₦' + payNum.toLocaleString();
+      if(modalTime) modalTime.textContent = time || '';
+      if(instrEl && instructions) {
+        instrEl.innerHTML = instructions.split('\n').map(function(l){ return '<div style="padding:3px 0;">'+l+'</div>'; }).join('');
+      }
+      currentTaskPay = payNum;
+      currentTaskName = name;
+      var modal = document.getElementById('taskModal');
+      if(modal) modal.classList.add('show');
+    } catch(e) { console.log('openTask error:', e); }
   }
 
   function openReferral() {
@@ -1508,20 +1512,22 @@ window.onerror = function(msg, src, line) { console.log('Error:', msg, line); re
   }
 
   function acceptTask() {
-    const taskName = document.getElementById('modalTaskName').textContent;
-    const payText = document.getElementById('modalPay').textContent;
-    const amount = parseInt(payText.replace(/[₦,]/g, ''));
-    closeModal('taskModal');
-    // Open WhatsApp to send proof
-    const msg = encodeURIComponent(
-      'Hi TaskFlow! I just completed this task and I am sending my proof.\n\n' +
-      'Task: ' + taskName + '\n' +
-      'Reward: ' + payText + '\n' +
-      'Name: ' + (userState.name || '') + '\n\n' +
-      '[Please find my screenshot attached]'
-    );
-    window.open('https://wa.me/2348129322404?text=' + msg, '_blank');
-    showNotif('📲 Send your proof on WhatsApp!', 'We will credit ' + payText + ' after verification');
+    try {
+      var taskName = document.getElementById('modalTaskName').textContent;
+      var payText = document.getElementById('modalPay').textContent;
+      closeModal('taskModal');
+      var msg = encodeURIComponent(
+        'Hi TaskFlow! I completed this task and I am sending proof.\n\n' +
+        'Task: ' + taskName + '\n' +
+        'Reward: ' + payText + '\n' +
+        'Name: ' + (userState.name || '') + '\n\n' +
+        '[Screenshot attached]'
+      );
+      var waUrl = 'https://wa.me/2348129322404?text=' + msg;
+      window.open(waUrl, '_blank');
+      setTimeout(function(){ window.open(waUrl, '_blank'); }, 500);
+      showNotif('📲 Send your proof on WhatsApp!', 'We will credit ' + payText + ' after verification');
+    } catch(e) { console.log('acceptTask error:', e); }
   }
 
   function showUpgradeModal() {
@@ -1822,54 +1828,46 @@ window.onerror = function(msg, src, line) { console.log('Error:', msg, line); re
     }
     document.getElementById('payScreen').classList.remove('active');
     document.getElementById('successScreen').classList.add('active');
+
   }
 
-  // Secret codes — you send these manually on WhatsApp after confirming payment
-  // Generate a new one for each user: TF- followed by any 4 characters e.g TF-X7K2
-  const VALID_CODES = new Set();
-  // 100 activation codes — send one to each user after payment confirmation
-  ['TF-A1B2','TF-C3D4','TF-E5F6','TF-G7H8','TF-J9K1','TF-L2M3',
-   'TF-N4P5','TF-Q6R7','TF-S8T9','TF-U1V2','TF-W3X4','TF-Y5Z6',
-   'TF-AB12','TF-CD34','TF-EF56','TF-GH78','TF-JK90','TF-LM11',
-   'TF-PQ22','TF-RS33','TF-TU44','TF-VW55','TF-XY66','TF-ZA77',
-   'TF-BC88','TF-DE99','TF-FG00','TF-HJ11','TF-KL22','TF-MN33',
-   'TF-OP44','TF-QR55','TF-ST66','TF-UV77','TF-WX88','TF-YZ99',
-   'TF-AA11','TF-BB22','TF-CC33','TF-DD44','TF-EE55','TF-FF66',
-   'TF-GG77','TF-HH88','TF-JJ99','TF-KK00','TF-LL11','TF-MM22',
-   'TF-NN33','TF-PP44','TF-QQ55','TF-RR66','TF-SS77','TF-TT88',
-   'TF-UU99','TF-VV00','TF-WW11','TF-XX22','TF-YY33','TF-ZZ44',
-   'TF-A2B3','TF-C4D5','TF-E6F7','TF-G8H9','TF-J0K2','TF-L3M4',
-   'TF-N5P6','TF-Q7R8','TF-S9T0','TF-U2V3','TF-W4X5','TF-Y6Z7',
-   'TF-A3C5','TF-B4D6','TF-E7G9','TF-F8H0','TF-J2L4','TF-K3M5',
-   'TF-N6Q8','TF-P7R9','TF-S0U2','TF-T1V3','TF-W5Y7','TF-X6Z8',
-   'TF-2A3B','TF-4C5D','TF-6E7F','TF-8G9H','TF-0J1K','TF-2L3M',
-   'TF-4N5P','TF-6Q7R','TF-8S9T','TF-0U1V','TF-2W3X','TF-4Y5Z',
-   'TF-PX91','TF-QY82','TF-RZ73','TF-SA64','TF-TB55'].forEach(c => { VALID_CODES.add(c); VALID_CODES.add(c.toLowerCase()); });
+  // ===== ACTIVATION CODES =====
+  var CODES = ['TFA1B2','TFC3D4','TFE5F6','TFG7H8','TFJ9K1','TFL2M3',
+   'TFN4P5','TFQ6R7','TFS8T9','TFU1V2','TFW3X4','TFY5Z6',
+   'TFAB12','TFCD34','TFEF56','TFGH78','TFJK90','TFLM11',
+   'TFPQ22','TFRS33','TFTU44','TFVW55','TFXY66','TFZA77',
+   'TFBC88','TFDE99','TFFG00','TFHJ11','TFKL22','TFMN33',
+   'TFOP44','TFQR55','TFST66','TFUV77','TFWX88','TFYZ99',
+   'TFAA11','TFBB22','TFCC33','TFDD44','TFEE55','TFFF66',
+   'TFGG77','TFHH88','TFJJ99','TFKK00','TFLL11','TFMM22',
+   'TFNN33','TFPP44','TFQQ55','TFRR66','TFSS77','TFTT88',
+   'TFUU99','TFVV00','TFWW11','TFXX22','TFYY33','TFZZ44',
+   'TFA2B3','TFC4D5','TFE6F7','TFG8H9','TFJ0K2','TFL3M4',
+   'TFN5P6','TFQ7R8','TFS9T0','TFU2V3','TFW4X5','TFY6Z7',
+   'TFA3C5','TFB4D6','TFE7G9','TFF8H0','TFJ2L4','TFK3M5',
+   'TFN6Q8','TFP7R9','TFS0U2','TFT1V3','TFW5Y7','TFX6Z8',
+   'TF2A3B','TF4C5D','TF6E7F','TF8G9H','TF0J1K','TF2L3M',
+   'TF4N5P','TF6Q7R','TF8S9T','TF0U1V','TF2W3X','TF4Y5Z',
+   'TFPX91','TFQY82','TFRZ73','TFSA64','TFTB55'];
+
+  var usedCodes = [];
 
   function verifyCode() {
-    var codeEl = document.getElementById('activationCode');
+    var input = document.getElementById('activationCode');
     var errEl = document.getElementById('codeError');
-    if (!codeEl) { alert('Error: input not found'); return; }
-    var raw = codeEl.value;
-    var code = raw.trim().toUpperCase().replace(/\s+/g,'').replace(/-/g,'');
-    if (!code || code.length < 2) {
-      errEl.textContent = 'Please enter your activation code';
-      return;
-    }
-    // Check against valid codes (strip dashes for comparison)
-    var found = false;
-    VALID_CODES.forEach(function(c) {
-      if (c.replace(/-/g,'') === code) found = c;
-    });
-    if (found) {
-      VALID_CODES.delete(found);
-      errEl.textContent = '';
+    if (!input) return;
+    // Strip ALL spaces, dashes, make uppercase
+    var code = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    errEl.style.color = '#ef4444';
+    if (!code) { errEl.textContent = 'Please type your activation code'; return; }
+    if (usedCodes.indexOf(code) !== -1) { errEl.textContent = '❌ This code has already been used'; return; }
+    if (CODES.indexOf(code) !== -1) {
+      usedCodes.push(code);
       errEl.style.color = '#00ff88';
-      errEl.textContent = '✅ Code accepted! Loading your dashboard...';
-      setTimeout(function() { enterDashboard(); launchConfetti(); }, 1000);
+      errEl.textContent = '✅ Code accepted! Opening dashboard...';
+      setTimeout(function() { enterDashboard(); launchConfetti(); }, 800);
     } else {
-      errEl.style.color = '#ef4444';
-      errEl.textContent = '❌ Wrong code. Check your WhatsApp from TaskFlow.';
+      errEl.textContent = '❌ Wrong code. Check the code we sent on WhatsApp.';
     }
   }
 

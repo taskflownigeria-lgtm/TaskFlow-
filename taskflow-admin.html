@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TaskFlow Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #07080f;
+    --surface: #0f1018;
+    --surface2: #161822;
+    --border: rgba(255,255,255,0.07);
+    --accent: #00ff88;
+    --red: #ef4444;
+    --gold: #fbbf24;
+    --purple: #7c3aed;
+    --text: #f0f0f0;
+    --muted: rgba(255,255,255,0.4);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'Syne',sans-serif; min-height:100vh; }
+
+  /* LOGIN */
+  #loginScreen {
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(0,255,136,0.08) 0%, transparent 60%);
+  }
+  .login-box {
+    background:var(--surface); border:1px solid var(--border); border-radius:20px;
+    padding:40px 32px; width:100%; max-width:360px; text-align:center;
+  }
+  .login-logo { font-size:28px; font-weight:800; margin-bottom:4px; }
+  .login-logo span { color:var(--accent); }
+  .login-sub { font-size:11px; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:2px; margin-bottom:32px; }
+  .admin-badge { display:inline-block; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; font-size:10px; font-family:'DM Mono',monospace; padding:4px 10px; border-radius:20px; margin-bottom:24px; }
+  .login-input {
+    width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text);
+    padding:14px 16px; border-radius:10px; font-family:'DM Mono',monospace; font-size:16px;
+    outline:none; margin-bottom:12px; letter-spacing:4px; text-align:center;
+  }
+  .login-input:focus { border-color:var(--accent); }
+  .login-btn {
+    width:100%; background:var(--accent); color:#000; padding:16px; border:none;
+    border-radius:12px; font-family:'Syne',sans-serif; font-size:16px; font-weight:800;
+    cursor:pointer; margin-top:4px;
+  }
+  .login-err { font-size:12px; color:var(--red); margin-top:10px; font-family:'DM Mono',monospace; min-height:18px; }
+
+  /* MAIN */
+  #adminPanel { display:none; }
+  .topbar {
+    background:var(--surface); border-bottom:1px solid var(--border);
+    padding:16px 20px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100;
+  }
+  .topbar-logo { font-size:18px; font-weight:800; }
+  .topbar-logo span { color:var(--accent); }
+  .topbar-right { display:flex; align-items:center; gap:10px; }
+  .payout-btn {
+    background:var(--gold); color:#000; border:none; padding:8px 16px; border-radius:8px;
+    font-family:'Syne',sans-serif; font-size:12px; font-weight:700; cursor:pointer;
+  }
+  .logout-btn {
+    background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:var(--red);
+    padding:8px 14px; border-radius:8px; font-family:'Syne',sans-serif; font-size:12px; font-weight:700; cursor:pointer;
+  }
+
+  .content { padding:20px; max-width:700px; margin:0 auto; }
+
+  /* STATS */
+  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+  .stat-card {
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px;
+  }
+  .stat-label { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; letter-spacing:2px; margin-bottom:6px; }
+  .stat-value { font-size:24px; font-weight:800; }
+  .stat-value.green { color:var(--accent); }
+  .stat-value.red { color:var(--red); }
+  .stat-value.gold { color:var(--gold); }
+
+  /* ADD USER */
+  .panel { background:var(--surface); border:1px solid var(--border); border-radius:14px; margin-bottom:16px; overflow:hidden; }
+  .panel-header { padding:14px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+  .panel-title { font-size:14px; font-weight:700; }
+  .add-form { padding:16px; display:grid; gap:10px; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .form-input {
+    background:var(--surface2); border:1px solid var(--border); color:var(--text);
+    padding:10px 12px; border-radius:8px; font-family:'DM Mono',monospace; font-size:12px; outline:none; width:100%;
+  }
+  .form-input:focus { border-color:var(--accent); }
+  .form-input::placeholder { color:var(--muted); }
+  .add-btn {
+    background:var(--accent); color:#000; border:none; padding:12px;
+    border-radius:10px; font-family:'Syne',sans-serif; font-size:13px; font-weight:800; cursor:pointer; width:100%;
+  }
+
+  /* USER TABLE */
+  .user-list { padding:0; }
+  .user-item {
+    padding:14px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px;
+  }
+  .user-item:last-child { border-bottom:none; }
+  .user-avatar {
+    width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--purple));
+    display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; color:white; flex-shrink:0;
+  }
+  .user-info { flex:1; min-width:0; }
+  .user-name { font-size:13px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .user-meta { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px; }
+  .user-balance { text-align:right; flex-shrink:0; }
+  .balance-amount { font-size:14px; font-weight:800; color:var(--accent); }
+  .balance-label { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; }
+  .user-actions { display:flex; gap:6px; flex-shrink:0; }
+  .action-btn {
+    border:none; padding:5px 10px; border-radius:6px; font-size:10px; font-weight:700; cursor:pointer; font-family:'Syne',sans-serif;
+  }
+  .btn-pay { background:rgba(0,255,136,0.15); color:var(--accent); border:1px solid rgba(0,255,136,0.3); }
+  .btn-del { background:rgba(239,68,68,0.1); color:var(--red); border:1px solid rgba(239,68,68,0.2); }
+  .btn-edit { background:rgba(251,191,36,0.1); color:var(--gold); border:1px solid rgba(251,191,36,0.2); }
+
+  /* PAYOUT LIST */
+  .payout-item {
+    padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;
+  }
+  .payout-item:last-child { border-bottom:none; }
+  .payout-name { font-size:13px; font-weight:700; }
+  .payout-detail { font-size:10px; color:var(--muted); font-family:'DM Mono',monospace; margin-top:2px; }
+  .payout-amount { font-size:15px; font-weight:800; color:var(--gold); }
+  .paid-badge { background:rgba(0,255,136,0.1); border:1px solid rgba(0,255,136,0.3); color:var(--accent); font-size:9px; font-family:'DM Mono',monospace; padding:2px 8px; border-radius:10px; }
+  .unpaid-badge { background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); color:var(--gold); font-size:9px; font-family:'DM Mono',monospace; padding:2px 8px; border-radius:10px; }
+
+  .empty-state { padding:30px; text-align:center; color:var(--muted); font-size:13px; }
+
+  /* MODAL */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:999; padding:20px; }
+  .modal-overlay.show { display:flex; }
+  .modal { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; width:100%; max-width:340px; }
+  .modal-title { font-size:16px; font-weight:800; margin-bottom:16px; }
+  .modal-input { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); padding:10px 12px; border-radius:8px; font-family:'DM Mono',monospace; font-size:13px; outline:none; margin-bottom:10px; }
+  .modal-input:focus { border-color:var(--accent); }
+  .modal-btn { width:100%; padding:12px; border:none; border-radius:10px; font-family:'Syne',sans-serif; font-size:14px; font-weight:800; cursor:pointer; margin-bottom:8px; }
+  .modal-btn.green { background:var(--accent); color:#000; }
+  .modal-btn.red { background:var(--red); color:white; }
+  .modal-btn.grey { background:var(--surface2); color:var(--muted); }
+
+  .notif {
+    position:fixed; top:16px; right:16px; background:var(--surface); border:1px solid var(--border);
+    border-radius:12px; padding:12px 16px; z-index:9999; transform:translateX(200%); transition:transform 0.3s;
+    font-size:13px; font-weight:700; max-width:260px;
+  }
+  .notif.show { transform:translateX(0); }
+  .notif.green { border-color:rgba(0,255,136,0.4); }
+  .notif.red { border-color:rgba(239,68,68,0.4); }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">Task<span>Flow</span></div>
+    <div class="login-sub">NIGERIA'S #1 MICROJOB PLATFORM</div>
+    <div class="admin-badge">🔐 ADMIN ACCESS ONLY</div>
+    <input class="login-input" type="password" id="adminPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()"/>
+    <button class="login-btn" onclick="adminLogin()">Enter Admin Panel →</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+  <div class="topbar">
+    <div class="topbar-logo">Task<span>Flow</span> <span style="font-size:11px;color:var(--red);font-family:DM Mono,monospace;">ADMIN</span></div>
+    <div class="topbar-right">
+      <button class="payout-btn" onclick="showPayoutView()">💳 Payout List</button>
+      <button class="logout-btn" onclick="adminLogout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">TOTAL MEMBERS</div>
+        <div class="stat-value green" id="statMembers">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">TOTAL COLLECTED</div>
+        <div class="stat-value gold" id="statCollected">₦0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">NEXT PAYOUT</div>
+        <div class="stat-value red" id="statPayout">₦0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">YOUR PROFIT</div>
+        <div class="stat-value green" id="statProfit">₦0</div>
+      </div>
+    </div>
+
+    <!-- ADD USER -->
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">➕ Add New Member</div>
+      </div>
+      <div class="add-form">
+        <div class="form-row">
+          <input class="form-input" id="newName" placeholder="Full name" />
+          <input class="form-input" id="newPhone" placeholder="Phone number" />
+        </div>
+        <div class="form-row">
+          <input class="form-input" id="newBank" placeholder="Bank name (e.g. Opay)" />
+          <input class="form-input" id="newAcct" placeholder="Account number" />
+        </div>
+        <div class="form-row">
+          <input class="form-input" id="newAcctName" placeholder="Account holder name" />
+          <input class="form-input" id="newCode" placeholder="Code sent (e.g. TFA1B2)" />
+        </div>
+        <button class="add-btn" onclick="addUser()">✅ Add Member & Record ₦4,500 Payment</button>
+      </div>
+    </div>
+
+    <!-- MEMBERS LIST -->
+    <div class="panel" id="membersPanel">
+      <div class="panel-header">
+        <div class="panel-title">👥 All Members</div>
+        <div style="font-size:11px;color:var(--muted);font-family:DM Mono,monospace;" id="memberCount">0 members</div>
+      </div>
+      <div class="user-list" id="userList">
+        <div class="empty-state">No members yet. Add your first member above! 👆</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAYOUT MODAL -->
+<div class="modal-overlay" id="payoutModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-title">💳 Payout List — <span id="payoutDate" style="color:var(--gold);">Next Payout</span></div>
+    <div style="font-size:12px;color:var(--muted);font-family:DM Mono,monospace;margin-bottom:16px;">Members eligible for withdrawal (balance ≥ ₦3,500)</div>
+    <div id="payoutList" style="max-height:400px;overflow-y:auto;"></div>
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+      <div style="font-size:12px;color:var(--muted);">Total to pay out:</div>
+      <div style="font-size:18px;font-weight:800;color:var(--red);" id="payoutTotal">₦0</div>
+    </div>
+    <button class="modal-btn grey" style="margin-top:12px;" onclick="closeModal('payoutModal')">Close</button>
+  </div>
+</div>
+
+<!-- EDIT USER MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-title">✏️ Edit Member</div>
+    <input class="modal-input" id="editBalance" placeholder="Current balance (e.g. 1500)" type="number"/>
+    <input class="modal-input" id="editReferrals" placeholder="Number of referrals" type="number"/>
+    <input class="modal-input" id="editNote" placeholder="Note (optional)" />
+    <button class="modal-btn green" onclick="saveEdit()">Save Changes</button>
+    <button class="modal-btn grey" onclick="closeModal('editModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-title">🗑️ Remove Member?</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;" id="deleteMsg">Are you sure?</div>
+    <button class="modal-btn red" onclick="confirmDelete()">Yes, Remove</button>
+    <button class="modal-btn grey" onclick="closeModal('deleteModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif"></div>
+
+<script>
+  // ===== ADMIN PASSWORD =====
+  var ADMIN_PASS = 'taskflow2026'; // Change this to your own password!
+
+  function adminLogin() {
+    var pass = document.getElementById('adminPass').value;
+    if (pass === ADMIN_PASS) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      loadUsers();
+      updateStats();
+    } else {
+      document.getElementById('loginErr').textContent = '❌ Wrong password. Try again.';
+    }
+  }
+
+  function adminLogout() {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('adminPass').value = '';
+  }
+
+  // ===== DATA STORAGE =====
+  function saveUsers() {
+    try { localStorage.setItem('tf_admin_users', JSON.stringify(users)); } catch(e) {}
+  }
+
+  function loadUsers() {
+    try {
+      var stored = localStorage.getItem('tf_admin_users');
+      if (stored) users = JSON.parse(stored);
+    } catch(e) {}
+    renderUsers();
+    updateStats();
+  }
+
+  var users = [];
+  var editIndex = -1;
+  var deleteIndex = -1;
+
+  // ===== ADD USER =====
+  function addUser() {
+    var name = document.getElementById('newName').value.trim();
+    var phone = document.getElementById('newPhone').value.trim();
+    var bank = document.getElementById('newBank').value.trim();
+    var acct = document.getElementById('newAcct').value.trim();
+    var acctName = document.getElementById('newAcctName').value.trim();
+    var code = document.getElementById('newCode').value.trim().toUpperCase();
+
+    if (!name || !phone) { showNotif('❌ Please enter name and phone!', 'red'); return; }
+
+    var user = {
+      name: name,
+      phone: phone,
+      bank: bank || '-',
+      acct: acct || '-',
+      acctName: acctName || name,
+      code: code || '-',
+      joinDate: new Date().toLocaleDateString('en-NG'),
+      paid: 4500,    // Registration fee they paid
+      balance: 500,  // Starting weekly earnings
+      referrals: 0,
+      totalEarned: 500,
+      payoutStatus: 'pending', // pending / paid
+      notes: ''
+    };
+
+    users.push(user);
+    saveUsers();
+    renderUsers();
+    updateStats();
+
+    // Clear form
+    ['newName','newPhone','newBank','newAcct','newAcctName','newCode'].forEach(function(id) {
+      document.getElementById(id).value = '';
+    });
+
+    showNotif('✅ ' + name + ' added!', 'green');
+  }
+
+  // ===== RENDER USERS =====
+  function renderUsers() {
+    var list = document.getElementById('userList');
+    var count = document.getElementById('memberCount');
+    count.textContent = users.length + ' members';
+
+    if (users.length === 0) {
+      list.innerHTML = '<div class="empty-state">No members yet. Add your first member above! 👆</div>';
+      return;
+    }
+
+    list.innerHTML = users.map(function(u, i) {
+      var initials = u.name.split(' ').map(function(n){ return n[0]; }).join('').substr(0,2).toUpperCase();
+      var totalBalance = u.balance + (u.referrals * 500);
+      return '<div class="user-item">' +
+        '<div class="user-avatar">' + initials + '</div>' +
+        '<div class="user-info">' +
+          '<div class="user-name">' + u.name + '</div>' +
+          '<div class="user-meta">' + u.phone + ' · Joined ' + u.joinDate + ' · Code: ' + u.code + '</div>' +
+          '<div class="user-meta" style="color:#7c3aed;">' + u.bank + ' — ' + u.acct + ' (' + u.acctName + ')</div>' +
+          (u.notes ? '<div class="user-meta" style="color:#fbbf24;">📝 ' + u.notes + '</div>' : '') +
+        '</div>' +
+        '<div class="user-balance">' +
+          '<div class="balance-amount">₦' + totalBalance.toLocaleString() + '</div>' +
+          '<div class="balance-label">' + u.referrals + ' referrals</div>' +
+        '</div>' +
+        '<div class="user-actions">' +
+          '<button class="action-btn btn-edit" onclick="openEdit(' + i + ')">Edit</button>' +
+          '<button class="action-btn btn-del" onclick="openDelete(' + i + ')">Del</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // ===== EDIT USER =====
+  function openEdit(i) {
+    editIndex = i;
+    var u = users[i];
+    document.getElementById('editBalance').value = u.balance;
+    document.getElementById('editReferrals').value = u.referrals;
+    document.getElementById('editNote').value = u.notes || '';
+    document.getElementById('editModal').classList.add('show');
+  }
+
+  function saveEdit() {
+    if (editIndex < 0) return;
+    users[editIndex].balance = parseInt(document.getElementById('editBalance').value) || 0;
+    users[editIndex].referrals = parseInt(document.getElementById('editReferrals').value) || 0;
+    users[editIndex].notes = document.getElementById('editNote').value;
+    saveUsers();
+    renderUsers();
+    updateStats();
+    closeModal('editModal');
+    showNotif('✅ Member updated!', 'green');
+  }
+
+  // ===== DELETE USER =====
+  function openDelete(i) {
+    deleteIndex = i;
+    document.getElementById('deleteMsg').textContent = 'Remove ' + users[i].name + ' from the system?';
+    document.getElementById('deleteModal').classList.add('show');
+  }
+
+  function confirmDelete() {
+    if (deleteIndex < 0) return;
+    var name = users[deleteIndex].name;
+    users.splice(deleteIndex, 1);
+    saveUsers();
+    renderUsers();
+    updateStats();
+    closeModal('deleteModal');
+    showNotif('🗑️ ' + name + ' removed', 'red');
+  }
+
+  // ===== STATS =====
+  function updateStats() {
+    var totalCollected = users.length * 4500;
+    var totalPayout = 0;
+    users.forEach(function(u) {
+      var bal = u.balance + (u.referrals * 500);
+      if (bal >= 3500) totalPayout += bal;
+    });
+    var profit = totalCollected - totalPayout;
+
+    document.getElementById('statMembers').textContent = users.length;
+    document.getElementById('statCollected').textContent = '₦' + totalCollected.toLocaleString();
+    document.getElementById('statPayout').textContent = '₦' + totalPayout.toLocaleString();
+    document.getElementById('statProfit').textContent = '₦' + profit.toLocaleString();
+  }
+
+  // ===== PAYOUT LIST =====
+  function showPayoutView() {
+    var eligible = users.filter(function(u) {
+      return (u.balance + u.referrals * 500) >= 3500;
+    });
+
+    var total = 0;
+    var html = '';
+
+    if (eligible.length === 0) {
+      html = '<div class="empty-state">No members have reached ₦3,500 minimum yet!</div>';
+    } else {
+      html = eligible.map(function(u, i) {
+        var bal = u.balance + (u.referrals * 500);
+        total += bal;
+        return '<div class="payout-item">' +
+          '<div>' +
+            '<div class="payout-name">' + u.name + '</div>' +
+            '<div class="payout-detail">' + u.bank + ' · ' + u.acct + '</div>' +
+            '<div class="payout-detail">' + u.acctName + ' · ' + u.phone + '</div>' +
+          '</div>' +
+          '<div style="text-align:right;">' +
+            '<div class="payout-amount">₦' + bal.toLocaleString() + '</div>' +
+            '<div class="unpaid-badge">TO PAY</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    // Set payout date
+    var now = new Date();
+    var day = now.getDate();
+    var nextDate = day < 15 ? '15th ' : '1st ';
+    var nextMonth = day < 15 ? now.toLocaleString('en-NG',{month:'long'}) : new Date(now.getFullYear(), now.getMonth()+1).toLocaleString('en-NG',{month:'long'});
+    document.getElementById('payoutDate').textContent = nextDate + nextMonth;
+    document.getElementById('payoutList').innerHTML = html;
+    document.getElementById('payoutTotal').textContent = '₦' + total.toLocaleString();
+    document.getElementById('payoutModal').classList.add('show');
+  }
+
+  // ===== UTILS =====
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+  }
+
+  var notifTimeout;
+  function showNotif(msg, type) {
+    var el = document.getElementById('notif');
+    el.textContent = msg;
+    el.className = 'notif show ' + (type || '');
+    clearTimeout(notifTimeout);
+    notifTimeout = setTimeout(function(){ el.classList.remove('show'); }, 3000);
+  }
+
+  // Enter key on password
+  document.getElementById('adminPass').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') adminLogin();
+  });
+</script>
+</body>
+</html>

@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+<meta http-equiv="Pragma" content="no-cache"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>TaskFlow — Earn Daily</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
@@ -758,11 +760,11 @@
           <div class="perk"><span class="perk-icon">✅</span> Instant access to all earning tasks</div>
           <div class="perk"><span class="perk-icon">✅</span> Personal wallet with bank withdrawal</div>
           <div class="perk"><span class="perk-icon">✅</span> Referral system — earn ₦500 per friend</div>
-          <div class="perk"><span class="perk-icon">✅</span> Daily tasks that pay ₦5,000–₦50,000</div>
+          <div class="perk"><span class="perk-icon">✅</span> Weekly tasks that pay up to ₦2,000</div>
           <div class="perk"><span class="perk-icon">✅</span> Leaderboard competitions & bonuses</div>
         </div>
         <div style="background:var(--surface2);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:16px;margin-bottom:16px;">
-          <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:2px;margin-bottom:12px;">TRANSFER ₦3,000 TO THIS ACCOUNT</div>
+          <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:2px;margin-bottom:12px;">TRANSFER ₦4,500 TO THIS ACCOUNT</div>
           <div style="display:flex;flex-direction:column;gap:10px;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:12px;color:var(--muted);">Bank</span>
@@ -784,7 +786,7 @@
             <div style="height:1px;background:rgba(255,255,255,0.05);"></div>
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span style="font-size:12px;color:var(--muted);">Amount</span>
-              <span style="font-size:16px;font-weight:800;color:var(--accent);">₦3,000</span>
+              <span style="font-size:16px;font-weight:800;color:var(--accent);">₦4,500</span>
             </div>
           </div>
         </div>
@@ -803,7 +805,7 @@
         <div class="success-screen active">
           <span class="success-icon">⏳</span>
           <div class="success-title">Payment Submitted!</div>
-          <div class="success-sub">We have received your WhatsApp message.<br><br>Once we confirm your ₦3,000 payment, we will send you an <strong style="color:#00ff88;">Activation Code</strong> on WhatsApp within <strong>5–15 minutes.</strong></div>
+          <div class="success-sub">We have received your WhatsApp message.<br><br>Once we confirm your ₦4,500 payment, we will send you an <strong style="color:#00ff88;">Activation Code</strong> on WhatsApp within <strong>5–15 minutes.</strong></div>
 
           <div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left;">
             <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;letter-spacing:2px;margin-bottom:10px;">ENTER ACTIVATION CODE</div>
@@ -851,7 +853,13 @@
       <div class="nav-item" onclick="showUpgradeModal()">
         <span class="icon">⭐</span> Go Premium
       </div>
-      <div class="nav-item">
+      <div class="nav-item" onclick="setPage('profile')">
+        <span class="icon">👤</span> My Profile
+      </div>
+      <div class="nav-item" onclick="setPage('terms')">
+        <span class="icon">📄</span> Terms & Rules
+      </div>
+      <div class="nav-item" onclick="setPage('settings')">
         <span class="icon">⚙️</span> Settings
       </div>
     </nav>
@@ -884,7 +892,7 @@
     <div class="stats-grid">
       <div class="stat-card green">
         <div class="stat-icon">💰</div>
-        <div class="stat-label">Today's Earnings</div>
+        <div class="stat-label">This Week's Earnings</div>
         <div class="stat-value green" id="todayEarnings">₦0</div>
         <div class="stat-change" id="todayChange">Complete tasks to earn!</div>
       </div>
@@ -925,8 +933,10 @@
             <button class="filter-btn" onclick="filterTasks(this,'social')">📱 Social</button>
             <button class="filter-btn" onclick="filterTasks(this,'design')">🎨 Design</button>
           </div>
-          <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:10px 16px;margin:0 16px 4px;font-size:12px;color:#fbbf24;">
-            📌 Complete each task and send screenshot proof to WhatsApp to receive your earnings
+          <div style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:8px;padding:12px 16px;margin:0 16px 8px;font-size:12px;color:#fbbf24;line-height:1.8;">
+            📌 Complete each task and send screenshot proof to WhatsApp to receive your earnings<br>
+            🔄 <strong style="color:white;">Tasks reset every Monday.</strong> Each task can only be done <strong style="color:white;">once per week.</strong><br>
+            💰 <strong style="color:white;">Base weekly: ₦500</strong> + <strong style="color:#00ff88;">₦500 per referral</strong> · Min withdrawal: ₦3,500
           </div>
           <div class="task-list">
             <div class="task-item">
@@ -1038,11 +1048,40 @@
           </div>
         </div>
 
+        <!-- FAQ -->
+        <div class="panel" style="margin-bottom:20px;">
+          <div class="panel-header">
+            <div class="panel-title">❓ Frequently Asked Questions</div>
+          </div>
+          <div style="padding:0 4px;">
+            <details style="border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer;">
+              <summary style="font-size:13px;font-weight:700;color:var(--text);list-style:none;display:flex;justify-content:space-between;">When do tasks reset? <span style="color:var(--accent);">+</span></summary>
+              <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7;">Tasks reset every <strong style="color:white;">Monday at 12:00AM.</strong> Each task can only be completed once per week.</div>
+            </details>
+            <details style="border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer;">
+              <summary style="font-size:13px;font-weight:700;color:var(--text);list-style:none;display:flex;justify-content:space-between;">When can I withdraw? <span style="color:var(--accent);">+</span></summary>
+              <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7;">Withdrawals are processed every <strong style="color:#fbbf24;">Friday by 6PM.</strong> Submit your request before Thursday midnight. Minimum withdrawal is <strong style="color:white;">₦3,500.</strong></div>
+            </details>
+            <details style="border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer;">
+              <summary style="font-size:13px;font-weight:700;color:var(--text);list-style:none;display:flex;justify-content:space-between;">How does referral work? <span style="color:var(--accent);">+</span></summary>
+              <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7;">Share your referral link with friends. When they register and pay, you earn <strong style="color:white;">₦500</strong> added to your weekly earnings. No limit on referrals!</div>
+            </details>
+            <details style="border-bottom:1px solid var(--border);padding:14px 0;cursor:pointer;">
+              <summary style="font-size:13px;font-weight:700;color:var(--text);list-style:none;display:flex;justify-content:space-between;">How do I get paid? <span style="color:var(--accent);">+</span></summary>
+              <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7;">Send your bank name, account number and account name to our WhatsApp: <strong style="color:#25D366;">08129322404</strong> before Thursday midnight. Payment comes every Friday.</div>
+            </details>
+            <details style="padding:14px 0;cursor:pointer;">
+              <summary style="font-size:13px;font-weight:700;color:var(--text);list-style:none;display:flex;justify-content:space-between;">How do I complete tasks? <span style="color:var(--accent);">+</span></summary>
+              <div style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7;">Click <strong style="color:white;">Start</strong> on any task, follow the instructions, take a screenshot and send it to our WhatsApp as proof. Earnings are credited after verification.</div>
+            </details>
+          </div>
+        </div>
+
         <!-- EARNINGS CHART -->
         <div class="panel">
           <div class="panel-header">
             <div class="panel-title">Weekly Earnings</div>
-            <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);">₦139,490 this week</div>
+            <div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);">₦14,500 this week</div>
           </div>
           <div class="chart-area">
             <div class="chart-bars">
@@ -1096,7 +1135,7 @@
           </div>
           <div class="daily-goal">
             <div class="dg-header">
-              <div class="dg-title">₦5,000 daily target</div>
+              <div class="dg-title">₦500 weekly target</div>
               <div class="dg-amount" id="goalAmount">₦0 / ₦5,000</div>
             </div>
             <div class="dg-bar"><div class="dg-fill" id="goalFill" style="width:0%"></div></div>
@@ -1139,27 +1178,27 @@
               <div class="lb-avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444);">SM</div>
               <div class="lb-info">
                 <div class="lb-name">Sarah M.</div>
-                <div class="lb-tasks">89 tasks</div>
+                <div class="lb-tasks">24 tasks · 8 referrals</div>
               </div>
-              <div class="lb-earn">₦42,500</div>
+              <div class="lb-earn">₦12,000</div>
             </div>
             <div class="lb-item">
               <div class="lb-rank rank-2">🥈</div>
               <div class="lb-avatar" style="background:linear-gradient(135deg,#3b82f6,#7c3aed);">AK</div>
               <div class="lb-info">
                 <div class="lb-name">Alex K.</div>
-                <div class="lb-tasks">74 tasks</div>
+                <div class="lb-tasks">18 tasks · 5 referrals</div>
               </div>
-              <div class="lb-earn">₦38,200</div>
+              <div class="lb-earn">₦8,000</div>
             </div>
             <div class="lb-item">
               <div class="lb-rank rank-3">🥉</div>
               <div class="lb-avatar" style="background:linear-gradient(135deg,#10b981,#3b82f6);">RL</div>
               <div class="lb-info">
                 <div class="lb-name">Rita L.</div>
-                <div class="lb-tasks">68 tasks</div>
+                <div class="lb-tasks">14 tasks · 3 referrals</div>
               </div>
-              <div class="lb-earn">₦31,750</div>
+              <div class="lb-earn">₦5,500</div>
             </div>
             <div class="lb-item" style="background:rgba(0,255,136,0.04);border-left:3px solid var(--accent);">
               <div class="lb-rank rank-other">#4</div>
@@ -1175,9 +1214,9 @@
               <div class="lb-avatar" style="background:linear-gradient(135deg,#ec4899,#8b5cf6);">TN</div>
               <div class="lb-info">
                 <div class="lb-name">Tom N.</div>
-                <div class="lb-tasks">47 tasks</div>
+                <div class="lb-tasks">8 tasks · 1 referral</div>
               </div>
-              <div class="lb-earn">₦24,100</div>
+              <div class="lb-earn">₦2,500</div>
             </div>
           </div>
         </div>
@@ -1185,6 +1224,125 @@
       </div>
     </div>
   </main>
+</div>
+
+</div><!-- end page-dashboard -->
+
+<!-- PROFILE PAGE -->
+<div class="page-panel" id="page-profile" style="display:none;padding:20px;">
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title">👤 My Profile</div></div>
+    <div style="padding:8px;">
+      <div style="text-align:center;padding:20px 0;">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#00ff88,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:white;margin:0 auto 12px;" id="profileAvatar">?</div>
+        <div style="font-size:20px;font-weight:800;" id="profileName">-</div>
+        <div style="font-size:12px;color:var(--muted);font-family:DM Mono,monospace;" id="profileEmail">-</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;margin-bottom:4px;">TOTAL EARNED</div>
+          <div style="font-size:20px;font-weight:800;color:#00ff88;" id="profileTotal">₦0</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;margin-bottom:4px;">REFERRALS</div>
+          <div style="font-size:20px;font-weight:800;color:#7c3aed;" id="profileReferrals">0</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;margin-bottom:4px;">TASKS DONE</div>
+          <div style="font-size:20px;font-weight:800;color:#fbbf24;" id="profileTasks">0</div>
+        </div>
+        <div style="background:var(--surface2);border-radius:10px;padding:14px;text-align:center;">
+          <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;margin-bottom:4px;">STREAK</div>
+          <div style="font-size:20px;font-weight:800;color:#ef4444;" id="profileStreak">🔥 0</div>
+        </div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:12px;">
+        <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;margin-bottom:6px;">YOUR REFERRAL CODE</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div style="font-size:18px;font-weight:800;color:#00ff88;font-family:DM Mono,monospace;" id="profileRefCode">-</div>
+          <button onclick="copyRefCode()" style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00ff88;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;">Copy</button>
+        </div>
+      </div>
+      <div style="background:var(--surface2);border-radius:10px;padding:14px;">
+        <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;margin-bottom:6px;">MEMBER SINCE</div>
+        <div style="font-size:14px;font-weight:700;" id="profileJoined">-</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TERMS PAGE -->
+<div class="page-panel" id="page-terms" style="display:none;padding:20px;">
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title">📄 Terms & Conditions</div></div>
+    <div style="padding:8px;font-size:13px;color:rgba(255,255,255,0.7);line-height:1.9;">
+      <div style="font-size:11px;color:var(--muted);font-family:DM Mono,monospace;margin-bottom:16px;">LAST UPDATED: MARCH 2026</div>
+
+      <div style="font-weight:800;color:white;margin-bottom:6px;">1. Registration</div>
+      <div style="margin-bottom:16px;">The ₦4,500 registration fee is <strong style="color:#ef4444;">strictly non-refundable</strong> under any circumstances. By registering you agree to all terms stated here.</div>
+
+      <div style="font-weight:800;color:white;margin-bottom:6px;">2. Task Completion</div>
+      <div style="margin-bottom:16px;">All tasks must be completed honestly. Screenshot proof must be real and unedited. <strong style="color:#ef4444;">Fake or edited screenshots will result in immediate ban</strong> with no refund.</div>
+
+      <div style="font-weight:800;color:white;margin-bottom:6px;">3. Withdrawals</div>
+      <div style="margin-bottom:16px;">Withdrawals are processed on the <strong style="color:#fbbf24;">1st and 15th</strong> of every month. Minimum withdrawal is <strong style="color:#00ff88;">₦3,500</strong>. Requests must be submitted 2 days before payout date via WhatsApp.</div>
+
+      <div style="font-weight:800;color:white;margin-bottom:6px;">4. Referrals</div>
+      <div style="margin-bottom:16px;">Referral bonus of <strong style="color:#00ff88;">₦500</strong> is credited only when referred user completes registration and payment. Fake referrals will result in ban.</div>
+
+      <div style="font-weight:800;color:white;margin-bottom:6px;">5. Account Ban Policy</div>
+      <div style="margin-bottom:16px;">TaskFlow reserves the right to <strong style="color:#ef4444;">ban any account</strong> found to be submitting fake task proof, manipulating the referral system, or engaging in fraudulent activity. Banned accounts forfeit all earnings.</div>
+
+      <div style="font-weight:800;color:white;margin-bottom:6px;">6. Changes to Terms</div>
+      <div style="margin-bottom:16px;">TaskFlow Nigeria reserves the right to update these terms at any time. Continued use of the platform means acceptance of updated terms.</div>
+
+      <div style="font-weight:800;color:white;margin-bottom:6px;">7. Contact</div>
+      <div style="margin-bottom:16px;">For any questions contact us on WhatsApp: <strong style="color:#25D366;">08129322404</strong></div>
+
+      <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px;margin-top:8px;">
+        <div style="font-size:12px;color:#ef4444;font-weight:700;">⚠️ By using TaskFlow you agree to all terms above.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS PAGE -->
+<div class="page-panel" id="page-settings" style="display:none;padding:20px;">
+  <div class="panel">
+    <div class="panel-header"><div class="panel-title">⚙️ Settings</div></div>
+    <div style="padding:8px;">
+      <div style="font-size:11px;color:var(--muted);font-family:DM Mono,monospace;letter-spacing:2px;margin-bottom:12px;">NOTIFICATIONS</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:14px;font-weight:600;">Task reminders</div>
+        <div style="width:44px;height:24px;background:#00ff88;border-radius:12px;position:relative;cursor:pointer;"><div style="width:20px;height:20px;background:white;border-radius:50%;position:absolute;right:2px;top:2px;"></div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);">
+        <div style="font-size:14px;font-weight:600;">Withdrawal reminders</div>
+        <div style="width:44px;height:24px;background:#00ff88;border-radius:12px;position:relative;cursor:pointer;"><div style="width:20px;height:20px;background:white;border-radius:50%;position:absolute;right:2px;top:2px;"></div></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);font-family:DM Mono,monospace;letter-spacing:2px;margin:16px 0 12px;">SUPPORT</div>
+      <div onclick="window.open('https://wa.me/2348129322404','_blank')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;">
+        <div style="font-size:14px;font-weight:600;">💬 Contact Support</div>
+        <div style="color:var(--muted);">→</div>
+      </div>
+      <div onclick="window.open('https://www.tiktok.com/@taskflownigeria','_blank')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;">
+        <div style="font-size:14px;font-weight:600;">🎵 Follow us on TikTok</div>
+        <div style="color:var(--muted);">→</div>
+      </div>
+      <div onclick="window.open('https://chat.whatsapp.com/C5EIBTd5hSkBdDPNErjGQ7','_blank')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer;">
+        <div style="font-size:14px;font-weight:600;">👥 Join WhatsApp Group</div>
+        <div style="color:var(--muted);">→</div>
+      </div>
+      <div onclick="setPage('terms')" style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;cursor:pointer;">
+        <div style="font-size:14px;font-weight:600;">📄 Terms & Conditions</div>
+        <div style="color:var(--muted);">→</div>
+      </div>
+      <div style="margin-top:24px;text-align:center;">
+        <div style="font-size:11px;color:var(--muted);font-family:DM Mono,monospace;">TaskFlow Nigeria v2.0</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:4px;">Built with ❤️ for Nigeria 🇳🇬</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- TASK MODAL -->
@@ -1306,10 +1464,16 @@
 </div>
 
 <script>
+window.onerror = function(msg, src, line) { console.log('Error:', msg, line); return true; };
+try {
   function setPage(page) {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    showNotif('📄 Loading ' + page + '...');
+    if(event && event.currentTarget) event.currentTarget.classList.add('active');
+    document.querySelectorAll('.page-panel').forEach(p => p.style.display = 'none');
+    const el = document.getElementById('page-' + page);
+    if (el) el.style.display = 'block';
+    else showNotif('📄 ' + page + ' page', 'Coming soon!');
+    if (page === 'profile') updateProfilePage();
   }
 
   function filterTasks(btn, cat) {
@@ -1337,7 +1501,7 @@
     const name = userState.name || 'Friend';
     const msg = encodeURIComponent('Hey! Join TaskFlow Nigeria and start earning daily!\nRegister here: [YOUR APP LINK]\nUse my referral: ' + (userState.referralCode || 'TF-' + Math.random().toString(36).substr(2,6).toUpperCase()));
     window.open('https://wa.me/?text=' + msg, '_blank');
-    showNotif('📲 Share your referral link!', 'Earn ₦400 for every friend who registers');
+    showNotif('📲 Share your referral link!', 'Earn ₦500 for every friend who registers');
   }
 
   function closeModal(id) {
@@ -1390,7 +1554,7 @@
     const amt = document.getElementById('withdrawAmt').value;
     if (!bank) { showNotif('❌ Please select your bank', 'Required field'); return; }
     if (acct.length !== 10) { showNotif('❌ Invalid account number', 'Must be 10 digits'); return; }
-    if (!amt || parseInt(amt) < 5000) { showNotif('❌ Minimum withdrawal is ₦5,000', 'Enter a valid amount'); return; }
+    if (!amt || parseInt(amt) < 3500) { showNotif('❌ Minimum withdrawal is ₦3,500', 'Enter a valid amount'); return; }
     closeModal('withdrawModal');
     showNotif('✅ Withdrawal of ₦' + parseInt(amt).toLocaleString() + ' submitted!', 'Processing to ' + bank + ' · Est. 1–24hrs');
   }
@@ -1470,10 +1634,10 @@
     }
 
     // Daily goal
-    const goalPct = Math.min(100, Math.round((userState.todayEarnings / 5000) * 100));
-    document.getElementById('goalAmount').textContent = formatNaira(userState.todayEarnings) + ' / ₦5,000';
+    const goalPct = Math.min(100, Math.round((userState.todayEarnings / 500) * 100));
+    document.getElementById('goalAmount').textContent = formatNaira(userState.todayEarnings) + ' / ₦500';
     document.getElementById('goalFill').style.width = goalPct + '%';
-    document.getElementById('goalSub').textContent = goalPct + '% complete · ' + (goalPct < 100 ? formatNaira(5000 - userState.todayEarnings) + ' remaining' : 'Daily goal reached! 🎉');
+    document.getElementById('goalSub').textContent = goalPct + '% complete · ' + (goalPct < 100 ? formatNaira(500 - userState.todayEarnings) + ' remaining' : 'Weekly goal reached! 🎉');
 
     // Progress bars
     document.getElementById('taskProgress').textContent = userState.tasksCompleted + ' / 5';
@@ -1592,6 +1756,32 @@
     handler.openIframe();
   }
 
+  // Withdrawal countdown timer - every Friday
+  function updateCountdown() {
+    const now = new Date();
+    const friday = new Date();
+    // Next 1st or 15th
+    const dayOfMonth = now.getDate();
+    if (dayOfMonth < 15) { friday.setDate(15); }
+    else { friday.setMonth(friday.getMonth() + 1); friday.setDate(1); }
+    friday.setHours(18, 0, 0, 0);
+    const diff = friday - now;
+    if (diff <= 0) { document.getElementById('countdownTimer').textContent = 'PAY DAY! 🎉'; return; }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    document.getElementById('countdownTimer').textContent =
+      (d > 0 ? d + 'd ' : '') + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
+
+  function openWhatsAppGroup() {
+    window.open('https://chat.whatsapp.com/C5EIBTd5hSkBdDPNErjGQ7?mode=gi_t', '_blank');
+    showNotif('💬 Join our WhatsApp community!', 'Connect with other TaskFlow members');
+  }
+
   function enterDashboard() {
     if (currentUser) {
       userState.name = currentUser.name;
@@ -1599,7 +1789,12 @@
       userState.referralCode = 'TF-' + currentUser.name.replace(/\s/g,'').substr(0,3).toUpperCase() + Math.floor(Math.random()*900+100);
     }
     document.getElementById('authGate').classList.add('hidden');
+    // Show dashboard panel
+    document.querySelectorAll('.page-panel').forEach(p => p.style.display = 'none');
+    if(document.getElementById('page-dashboard')) document.getElementById('page-dashboard').style.display = 'block';
     updateDashboard();
+    checkStreak();
+    scheduleAnnouncement();
     setTimeout(() => showNotif('👋 Welcome to TaskFlow, ' + (currentUser ? currentUser.name.split(' ')[0] : '') + '!', 'Complete tasks to start earning!'), 500);
   }
 
@@ -1616,7 +1811,7 @@
     const name = currentUser ? currentUser.name : 'New User';
     const email = currentUser ? currentUser.email : '';
     const msg = encodeURIComponent(
-      "Hi TaskFlow! I just paid ₦3,000 for account activation.\n\n" +
+      "Hi TaskFlow! I just paid ₦4,500 for account activation.\n\n" +
       "Name: " + name + "\n" +
       "Email: " + email + "\n\n" +
       "Please find my payment screenshot attached. Kindly send me my Activation Code. Thank you!"
@@ -1629,10 +1824,24 @@
   // Secret codes — you send these manually on WhatsApp after confirming payment
   // Generate a new one for each user: TF- followed by any 4 characters e.g TF-X7K2
   const VALID_CODES = new Set();
-  // Add some pre-set codes you can give to users (you can change these anytime)
+  // 100 activation codes — send one to each user after payment confirmation
   ['TF-A1B2','TF-C3D4','TF-E5F6','TF-G7H8','TF-J9K1','TF-L2M3',
    'TF-N4P5','TF-Q6R7','TF-S8T9','TF-U1V2','TF-W3X4','TF-Y5Z6',
-   'TF-AB12','TF-CD34','TF-EF56','TF-GH78','TF-JK90','TF-LM11'].forEach(c => VALID_CODES.add(c));
+   'TF-AB12','TF-CD34','TF-EF56','TF-GH78','TF-JK90','TF-LM11',
+   'TF-PQ22','TF-RS33','TF-TU44','TF-VW55','TF-XY66','TF-ZA77',
+   'TF-BC88','TF-DE99','TF-FG00','TF-HJ11','TF-KL22','TF-MN33',
+   'TF-OP44','TF-QR55','TF-ST66','TF-UV77','TF-WX88','TF-YZ99',
+   'TF-AA11','TF-BB22','TF-CC33','TF-DD44','TF-EE55','TF-FF66',
+   'TF-GG77','TF-HH88','TF-JJ99','TF-KK00','TF-LL11','TF-MM22',
+   'TF-NN33','TF-PP44','TF-QQ55','TF-RR66','TF-SS77','TF-TT88',
+   'TF-UU99','TF-VV00','TF-WW11','TF-XX22','TF-YY33','TF-ZZ44',
+   'TF-A2B3','TF-C4D5','TF-E6F7','TF-G8H9','TF-J0K2','TF-L3M4',
+   'TF-N5P6','TF-Q7R8','TF-S9T0','TF-U2V3','TF-W4X5','TF-Y6Z7',
+   'TF-A3C5','TF-B4D6','TF-E7G9','TF-F8H0','TF-J2L4','TF-K3M5',
+   'TF-N6Q8','TF-P7R9','TF-S0U2','TF-T1V3','TF-W5Y7','TF-X6Z8',
+   'TF-2A3B','TF-4C5D','TF-6E7F','TF-8G9H','TF-0J1K','TF-2L3M',
+   'TF-4N5P','TF-6Q7R','TF-8S9T','TF-0U1V','TF-2W3X','TF-4Y5Z',
+   'TF-PX91','TF-QY82','TF-RZ73','TF-SA64','TF-TB55'].forEach(c => VALID_CODES.add(c));
 
   function verifyCode() {
     const code = document.getElementById('activationCode').value.trim().toUpperCase();
@@ -1671,8 +1880,135 @@
 
   // ===== END AUTH GATE LOGIC =====
 
+  // Update profile page when opened
+  function updateProfilePage() {
+    document.getElementById('profileName').textContent = userState.name || '-';
+    document.getElementById('profileEmail').textContent = userState.email || '-';
+    document.getElementById('profileTotal').textContent = formatNaira(userState.balance + (userState.transactions || []).reduce((a,t) => a + (t.amount||0), 0));
+    document.getElementById('profileTasks').textContent = userState.tasksCompleted || 0;
+    document.getElementById('profileStreak').textContent = '🔥 ' + (userState.streak || 0);
+    document.getElementById('profileRefCode').textContent = userState.referralCode || '-';
+    document.getElementById('profileJoined').textContent = new Date().toLocaleDateString('en-NG', {day:'numeric',month:'long',year:'numeric'});
+    const initials = (userState.name||'TF').split(' ').map(n=>n[0]).join('').substr(0,2).toUpperCase();
+    document.getElementById('profileAvatar').textContent = initials;
+    if(document.getElementById('profileReferrals')) document.getElementById('profileReferrals').textContent = userState.referralCount || 0;
+  }
+
+  function copyRefCode() {
+    const code = userState.referralCode || '';
+    navigator.clipboard.writeText(code).then(() => showNotif('✅ Referral code copied!', 'Share it with friends to earn ₦500'));
+  }
+
+  // ===== SPIN WHEEL =====
+  let spinUsed = false;
+  function openSpinWheel() {
+    if (spinUsed) { showNotif('⏳ Already spun today!', 'Come back tomorrow for another spin'); return; }
+    document.getElementById('spinModal').classList.add('show');
+  }
+
+  function spinWheel() {
+    if (spinUsed) return;
+    spinUsed = true;
+    const prizes = [100, 200, 50, 500, 100, 200, 50, 300];
+    const prize = prizes[Math.floor(Math.random() * prizes.length)];
+    const wheelEl = document.getElementById('spinWheelEl');
+    const deg = 1440 + Math.floor(Math.random() * 360);
+    wheelEl.style.transition = 'transform 3s cubic-bezier(0.17,0.67,0.12,0.99)';
+    wheelEl.style.transform = 'rotate(' + deg + 'deg)';
+    setTimeout(() => {
+      userState.balance += prize;
+      userState.todayEarnings += prize;
+      updateDashboard();
+      document.getElementById('spinResult').innerHTML = '🎉 You won <strong style="color:#00ff88;">₦' + prize + '</strong>! Added to your wallet!';
+      document.getElementById('spinBtn').style.display = 'none';
+      showNotif('🎰 Spin bonus! ₦' + prize + ' added!', 'Come back tomorrow to spin again!');
+      launchConfetti();
+    }, 3200);
+  }
+
+  // ===== STREAK REWARD =====
+  function checkStreak() {
+    try {
+      var today = new Date().toDateString();
+      var lastVisit = '';
+      try { lastVisit = localStorage.getItem('tf_last_visit') || ''; } catch(e) {}
+      var yesterday = new Date(Date.now() - 86400000).toDateString();
+      if (lastVisit === yesterday) {
+        userState.streak = (userState.streak || 0) + 1;
+      } else if (lastVisit !== today) {
+        userState.streak = 1;
+      }
+      try { localStorage.setItem('tf_last_visit', today); } catch(e) {}
+      if (userState.streak === 7) {
+        userState.balance += 200;
+        setTimeout(function() { showNotif('🔥 7-Day Streak! ₦200 bonus added!', 'Keep logging in daily for more rewards!'); }, 2000);
+        userState.streak = 0;
+        launchConfetti();
+      }
+    } catch(e) { console.log('Streak error:', e); }
+    var sc = document.getElementById('streakCount');
+    if(sc) sc.textContent = userState.streak || 1;
+  }
+
+  // ===== ANNOUNCEMENT POPUP =====
+  const ANNOUNCEMENT = {
+    active: true,
+    title: '📢 Welcome to TaskFlow!',
+    message: 'Complete your first task this week and earn ₦500! Withdrawal day is the 1st and 15th of every month. Send your bank details to WhatsApp before the 13th or 28th to receive payment on time! 💚'
+  };
+
+  function showAnnouncement() {
+    if (!ANNOUNCEMENT.active) return;
+    document.getElementById('announcementModal').classList.add('show');
+  }
+
+  // Show announcement 2 seconds after login
+  function scheduleAnnouncement() {
+    setTimeout(showAnnouncement, 2000);
+  }
+
+  // Override enterDashboard to call new features
+  const _origEnter = enterDashboard;
+
+  // Init - show dashboard panel on load
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.page-panel').forEach(p => p.style.display = 'none');
+    if(document.getElementById('page-dashboard')) document.getElementById('page-dashboard').style.display = 'block';
+  });
+
   // Welcome notification on load
-  setTimeout(() => showNotif('👋 Welcome back, John!', '3 new high-paying tasks available'), 800);
+  setTimeout(() => showNotif('👋 Welcome back, ' + (userState.name ? userState.name.split(' ')[0] : 'there') + '!', '3 new tasks available this week'), 800);
+} catch(e) { console.log('Script error:', e); }
 </script>
+
+<!-- SPIN WHEEL MODAL -->
+<div class="modal-overlay" id="spinModal">
+  <div class="modal" style="max-width:340px;">
+    <button class="modal-close" onclick="closeModal('spinModal')">✕</button>
+    <div class="modal-title">🎰 Daily Spin</div>
+    <div style="font-size:13px;color:var(--muted);text-align:center;margin-bottom:20px;">Spin once per day for a bonus reward!</div>
+    <div style="position:relative;width:220px;height:220px;margin:0 auto 20px;">
+      <div id="spinWheelEl" style="width:220px;height:220px;border-radius:50%;background:conic-gradient(#00ff88 0deg 45deg,#7c3aed 45deg 90deg,#fbbf24 90deg 135deg,#ef4444 135deg 180deg,#00ff88 180deg 225deg,#7c3aed 225deg 270deg,#fbbf24 270deg 315deg,#3b82f6 315deg 360deg);border:4px solid var(--border);display:flex;align-items:center;justify-content:center;position:relative;">
+      </div>
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;background:var(--surface);border-radius:50%;border:3px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:20px;z-index:10;">🎯</div>
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);font-size:24px;">▼</div>
+    </div>
+    <div id="spinResult" style="text-align:center;font-size:14px;margin-bottom:16px;min-height:24px;"></div>
+    <button id="spinBtn" class="modal-btn" onclick="spinWheel()">🎰 SPIN NOW!</button>
+  </div>
+</div>
+
+<!-- ANNOUNCEMENT MODAL -->
+<div class="modal-overlay" id="announcementModal">
+  <div class="modal" style="max-width:360px;">
+    <button class="modal-close" onclick="closeModal('announcementModal')">✕</button>
+    <div style="text-align:center;font-size:36px;margin-bottom:12px;">📢</div>
+    <div class="modal-title" style="text-align:center;">Announcement</div>
+    <div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.15);border-radius:12px;padding:16px;margin:16px 0;font-size:13px;color:rgba(255,255,255,0.8);line-height:1.8;" id="announcementText">
+      Complete your first task this week and earn ₦500! Withdrawal day is the 1st and 15th of every month. Send your bank details to WhatsApp before the 13th or 28th to receive payment on time! 💚
+    </div>
+    <button class="modal-btn" onclick="closeModal('announcementModal')">Got it! ✅</button>
+  </div>
+</div>
 </body>
 </html>

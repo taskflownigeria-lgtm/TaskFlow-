@@ -809,7 +809,7 @@
 
           <div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:16px;margin-bottom:16px;text-align:left;">
             <div style="font-size:10px;color:var(--muted);font-family:DM Mono,monospace;letter-spacing:2px;margin-bottom:10px;">ENTER ACTIVATION CODE</div>
-            <input type="text" id="activationCode" maxlength="8" placeholder="e.g. TF-A3K9" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:9px;font-family:DM Mono,monospace;font-size:18px;text-align:center;letter-spacing:4px;outline:none;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()"/>
+            <input type="text" id="activationCode" maxlength="10" placeholder="e.g. TF-A3K9" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:12px 14px;border-radius:9px;font-family:DM Mono,monospace;font-size:18px;text-align:center;letter-spacing:4px;outline:none;text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()"/>
             <div style="font-size:11px;color:var(--muted);margin-top:8px;text-align:center;font-family:DM Mono,monospace;">Code will be sent to your WhatsApp after payment confirmation</div>
           </div>
 
@@ -1844,20 +1844,20 @@ window.onerror = function(msg, src, line) { console.log('Error:', msg, line); re
    'TF-N6Q8','TF-P7R9','TF-S0U2','TF-T1V3','TF-W5Y7','TF-X6Z8',
    'TF-2A3B','TF-4C5D','TF-6E7F','TF-8G9H','TF-0J1K','TF-2L3M',
    'TF-4N5P','TF-6Q7R','TF-8S9T','TF-0U1V','TF-2W3X','TF-4Y5Z',
-   'TF-PX91','TF-QY82','TF-RZ73','TF-SA64','TF-TB55'].forEach(c => VALID_CODES.add(c));
+   'TF-PX91','TF-QY82','TF-RZ73','TF-SA64','TF-TB55'].forEach(c => { VALID_CODES.add(c); VALID_CODES.add(c.toLowerCase()); });
 
   function verifyCode() {
-    const code = document.getElementById('activationCode').value.trim().toUpperCase();
-    const errEl = document.getElementById('codeError');
+    var codeEl = document.getElementById('activationCode');
+    var errEl = document.getElementById('codeError');
+    var code = codeEl.value.trim().toUpperCase().replace(/\s/g,'');
     if (!code) { errEl.textContent = 'Please enter your activation code'; return; }
-    if (code.length < 6) { errEl.textContent = 'Code must be at least 6 characters'; return; }
     if (VALID_CODES.has(code)) {
-      VALID_CODES.delete(code); // Each code works only once
+      VALID_CODES.delete(code);
       errEl.textContent = '';
       enterDashboard();
       launchConfetti();
     } else {
-      errEl.textContent = '❌ Invalid or already used code. Check your WhatsApp.';
+      errEl.textContent = '❌ Wrong code. Check your WhatsApp message from us.';
     }
   }
 

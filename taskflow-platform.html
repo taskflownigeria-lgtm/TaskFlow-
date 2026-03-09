@@ -1826,8 +1826,7 @@ window.onerror = function(msg, src, line) { console.log('Error:', msg, line); re
     if (!win || win.closed || typeof win.closed == 'undefined') {
       window.location.href = waUrl;
     }
-    document.getElementById('payScreen').classList.remove('active');
-    document.getElementById('successScreen').classList.add('active');
+    setTimeout(function(){ enterDashboard(); launchConfetti(); }, 1000);
 
   }
 
@@ -1855,19 +1854,30 @@ window.onerror = function(msg, src, line) { console.log('Error:', msg, line); re
   function verifyCode() {
     var input = document.getElementById('activationCode');
     var errEl = document.getElementById('codeError');
-    if (!input) return;
-    // Strip ALL spaces, dashes, make uppercase
-    var code = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-    errEl.style.color = '#ef4444';
-    if (!code) { errEl.textContent = 'Please type your activation code'; return; }
-    if (usedCodes.indexOf(code) !== -1) { errEl.textContent = '❌ This code has already been used'; return; }
+    if (!input) { alert('Input not found!'); return; }
+    var raw = input.value || '';
+    var code = raw.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (!code) { 
+      errEl.style.color = '#ef4444';
+      errEl.textContent = 'Please type your activation code'; 
+      return; 
+    }
+    if (usedCodes.indexOf(code) !== -1) { 
+      errEl.style.color = '#ef4444';
+      errEl.textContent = '❌ Code already used'; 
+      return; 
+    }
     if (CODES.indexOf(code) !== -1) {
       usedCodes.push(code);
       errEl.style.color = '#00ff88';
       errEl.textContent = '✅ Code accepted! Opening dashboard...';
-      setTimeout(function() { enterDashboard(); launchConfetti(); }, 800);
+      setTimeout(function() { 
+        try { enterDashboard(); } catch(e){ alert('Dashboard error: ' + e); }
+        try { launchConfetti(); } catch(e){}
+      }, 500);
     } else {
-      errEl.textContent = '❌ Wrong code. Check the code we sent on WhatsApp.';
+      errEl.style.color = '#ef4444';
+      errEl.textContent = '❌ Wrong code. Use the code we sent on WhatsApp.';
     }
   }
 
